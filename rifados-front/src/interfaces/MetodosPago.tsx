@@ -1,13 +1,6 @@
 import instance from "../api/axios";
 import { useEffect, useState } from "react";
-
-interface CuentasBancariasI {
-  banco: string;
-  clabe: string;
-  imagenbanco: string;
-  no_tarjeta: string;
-  titularCuenta: string;
-}
+import { CuentasBancariasI } from "../constants/Interfaces-ts";
 
 export default function MetodosPago() {
   const [cuentasBancarias, setCuentasBancarias] = useState<CuentasBancariasI[]>(
@@ -39,7 +32,7 @@ export default function MetodosPago() {
           ? cuentasBancarias.map((cuenta, index) => (
               <div key={index} className="row m-0 rounded-3 p-2 datos-banco mb-3 py-2">
                 <div className="col-lg-2 col-md-12 col-xs-12 border-end d-flex align-items-center justify-content-center">
-                  <img src={cuenta.imagenbanco} className="img-carusel rounded-2" />
+                  <img src={cuenta.logo_banco} className="img-carusel rounded-2" />
                 </div>
                 <div className="col-lg-10 col-md-12 col-xs-12 mt-2">
                   <div className="d-flex mb-1" style={{ fontSize: "15px" }}>

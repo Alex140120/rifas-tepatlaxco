@@ -15,11 +15,25 @@ import { Modal } from "react-bootstrap";
 
 import ModalMetodosdePago from "./ModalMetodosdePago";
 import Alerta from "../../components/Alertas/Alerta";
+import Swal from "sweetalert2";
+import instance from "../../api/axios";
 
 interface Props {
   show: boolean;
   handleClose: () => void;
   boletos: number[];
+}
+
+interface EstadosI {
+  id: number;
+  nombre: string;
+}
+
+interface LocalidadesI {
+  cp: string;
+  localidad: string;
+  estado: string;
+  tipo: string;
 }
 
 export default function ModalAgregarBoletos({
@@ -31,8 +45,13 @@ export default function ModalAgregarBoletos({
 
   const [nombre, setNombre] = useState<string>("");
   const [numTelefono, setNumTelefono] = useState<string>("");
+
   const [estado, setEstado] = useState<string | number>("");
+  const [estados, setEstados] = useState<EstadosI[]>([]);
+
   const [localidad, setLocalidad] = useState<string | number>("");
+  const [localidades, setLocalidades] = useState<LocalidadesI[]>([]);
+
   const [domicilio, setDomicilio] = useState<string>("");
   const [codigoPostal, setCodigoPostal] = useState<string | number>("");
 
@@ -45,6 +64,7 @@ export default function ModalAgregarBoletos({
   useEffect(() => {
     if (show && boletos.length) {
       setBoletosUsuario(boletos);
+      obtenerEstados();
     } else {
       setContenido(<></>);
       setBoletosUsuario([]);
@@ -53,6 +73,47 @@ export default function ModalAgregarBoletos({
       setMostrarOcultarBtn(false);
     }
   }, [show]);
+
+  // Estados
+  const obtenerEstados = async () => {
+    try {
+      const response = await instance.get("/obtenerEstadosMexicanos");
+      //console.log(response.data);
+      setEstados(response.data.estados);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // onChange estado
+  useEffect(() => {
+    setLocalidad("");
+    setLocalidades([]);
+    if (estado) {
+      const obtenerLocalidadesEstado = (estado: number | string) => {
+        instance
+          .get("/localidadesEstado", { params: { estado } })
+          .then(function (response) {
+            //console.log(response.data);
+            setLocalidades(response.data.lodalidades);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      };
+      obtenerLocalidadesEstado(estado);
+    }
+  }, [estado]);
+
+  const handleSeleccionaLocalidad = (localidad: string) => {
+    setLocalidad(localidad);
+
+    // obtener el objeto para extraer el codigo postal
+    const localidadObj: LocalidadesI | undefined = localidades.find(
+      (local) => local.localidad === localidad
+    );
+    setCodigoPostal(localidadObj?.cp ?? "");
+  };
 
   // General el contenido
   useEffect(() => {
@@ -128,7 +189,12 @@ export default function ModalAgregarBoletos({
                     }}
                   >
                     <option value="">Estado</option>
-                    <option value="1">Puebla</option>
+                    {estados.length &&
+                      estados.map((edo, index) => (
+                        <option key={index} value={edo.id}>
+                          {edo.nombre}
+                        </option>
+                      ))}
                   </select>
                 </div>
               </div>
@@ -145,11 +211,17 @@ export default function ModalAgregarBoletos({
                     className="w-100 border-0 rounded-end-2 px-1 py-1 icon-color"
                     value={localidad}
                     onChange={(e) => {
-                      setLocalidad(e.target.value);
+                      handleSeleccionaLocalidad(e.target.value);
                     }}
                   >
                     <option value="">Localidad</option>
-                    <option value="1">Tepatlaxco de Hidalgo</option>
+                    {localidades
+                      ? localidades.map((local, index) => (
+                          <option key={index} value={local.localidad}>
+                            {local.localidad}
+                          </option>
+                        ))
+                      : null}
                   </select>
                 </div>
               </div>
@@ -243,11 +315,13 @@ export default function ModalAgregarBoletos({
     nombre,
     numTelefono,
     estado,
+    estados,
     localidad,
+    localidades,
     domicilio,
     codigoPostal,
     alerta,
-    mostrarOcultarBtn
+    mostrarOcultarBtn,
   ]);
 
   const handleChangeNumero = (numero: any) => {
@@ -274,18 +348,20 @@ export default function ModalAgregarBoletos({
         boletosUsuario,
       };
 
-      console.log(datos);
-      setTimeout(() => {
-        setAlerta(
-          <Alerta
-            clases="alerta-success"
-            header=""
-            body={`Tus datos han sido guardados exitosamente. <br/> 
-              Presiona el botón "Métodos de Pago" para ver todas las cuentas donde puedes realizar las transferencias por el monto correspondiente.`}
-          />
-        );
-        setMostrarOcultarBtn(true);
-      }, 2000);
+      Swal.fire({
+        title: "",
+        text: `Si tus datos son correctos, presiona "Aceptar" para continuar.`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#05c7a7",
+        confirmButtonText: "Aceptar",
+        cancelButtonColor: "#d33",
+        cancelButtonText: "Cancelar",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          ejecutarGuardadoDatos(datos);
+        }
+      });
     } else {
       setAlerta(
         <Alerta
@@ -297,9 +373,22 @@ export default function ModalAgregarBoletos({
     }
   };
 
-  function verMetodosPago () {
+  const ejecutarGuardadoDatos = (datos: Object) => {
+    console.log(datos);
+    setAlerta(
+      <Alerta
+        clases="alerta-success"
+        header=""
+        body={`Tus datos han sido guardados exitosamente. <br/> 
+          Presiona el botón "Métodos de Pago" para ver todas las cuentas donde puedes realizar las transferencias por el monto correspondiente.`}
+      />
+    );
+    setMostrarOcultarBtn(true);
+  };
+
+  function verMetodosPago() {
     setTituloModal("Métodos de Pago");
-    setContenido(<ModalMetodosdePago/>);
+    setContenido(<ModalMetodosdePago />);
   }
 
   return (

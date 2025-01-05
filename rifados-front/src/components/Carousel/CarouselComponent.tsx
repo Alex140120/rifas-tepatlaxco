@@ -20,8 +20,8 @@ function CarouselComponent() {
       <Carousel slide={true} className="p-0 container-pagos">
         <Carousel.Item className="px-0 py-3 pt-2">
           <div className="carusel-img-content m-auto pb-0">
-            <div className="banco-1 d-flex justify-content-center align-items-center flex-column">
-              <img src={MercadoPago} className="img-carusel" />
+            <div className="banco-2 d-flex justify-content-center align-items-center flex-column">
+              <img src={BancoAzteca} className="img-carusel" />
               <button
                 className="btn-bancos rounded-4 mt-2 py-1 px-2 outline-none"
                 onClick={() => {
@@ -34,7 +34,7 @@ function CarouselComponent() {
             </div>
 
             <div className="banco-2 d-flex justify-content-center align-items-center flex-column">
-              <img src={BancoAzteca} className="img-carusel" />
+              <img src={NU} className="img-carusel" />
               <button
                 className="btn-bancos rounded-4 mt-2 py-1 px-2 outline-none"
                 onClick={() => {
@@ -63,8 +63,8 @@ function CarouselComponent() {
               </button>
             </div>
 
-            <div className="banco-2 d-flex justify-content-center align-items-center flex-column">
-              <img src={NU} className="img-carusel" />
+            <div className="banco-1 d-flex justify-content-center align-items-center flex-column">
+              <img src={MercadoPago} className="img-carusel" />
               <button
                 className="btn-bancos rounded-4 mt-2 py-1 px-2 outline-none"
                 onClick={() => {

@@ -17,6 +17,7 @@ import ModalMetodosdePago from "./ModalMetodosdePago";
 import Alerta from "../../components/Alertas/Alerta";
 import Swal from "sweetalert2";
 import instance from "../../api/axios";
+import InputFile from "../../components/Archivos/InputFile";
 
 interface Props {
   show: boolean;
@@ -113,6 +114,17 @@ export default function ModalAgregarBoletos({
       (local) => local.localidad === localidad
     );
     setCodigoPostal(localidadObj?.cp ?? "");
+  };
+
+  const handleSubirArchivo = async (formData: FormData) => {
+    try {
+      const response = await instance.post("/subirArchivo", formData);
+      
+      console.log(response.data);
+      
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   // General el contenido
@@ -264,25 +276,10 @@ export default function ModalAgregarBoletos({
               </div>
               {/* Archivo */}
               <div className="col-lg-12 col-md-12 col-xs-12 mb-2">
-                <div className="border rounded-2 d-flex align-items-center">
-                  <span className="fs-8 px-3">
-                    <FontAwesomeIcon
-                      icon={faFileUpload}
-                      className="icon-color"
-                    />
-                  </span>
-                  <label htmlFor="ine" className="py-1 icon-color">
-                    Subir identificación
-                  </label>
-                  <input
-                    id="ine"
-                    name="ine"
-                    type="file"
-                    placeholder="Código postal"
-                    className="w-100 border-0 rounded-end-2 px-1 py-1 icon-color d-none"
-                    accept=".pdf"
-                  />
-                </div>
+                <InputFile
+                  extensiones=".pdf"
+                  onFormDataReady={handleSubirArchivo}
+                />
               </div>
             </div>
 

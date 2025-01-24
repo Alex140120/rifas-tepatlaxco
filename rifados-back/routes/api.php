@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AreasGeograficasController;
 use App\Http\Controllers\CuentasBancariasController;
+use App\Http\Controllers\ProcesosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,3 +16,5 @@ Route::get('/cuentasbancoseleccionado', [CuentasBancariasController::class, 'cue
 
 Route::get('/obtenerEstadosMexicanos', [AreasGeograficasController::class, 'estadosMexicanos']);
 Route::get('/localidadesEstado', [AreasGeograficasController::class, 'localidades_estado']);
+
+Route::post('/subirArchivo', [ProcesosController::class, 'subir_archivo']);

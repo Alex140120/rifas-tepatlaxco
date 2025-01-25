@@ -492,3 +492,7 @@ select {
   color: #a56113;
   text-align: center;
 }
+
+.card-login {
+  box-shadow: 0 0 15px 3px #070707;
+}

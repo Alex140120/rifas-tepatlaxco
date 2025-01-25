@@ -11,10 +11,16 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::get('/cuentasBancarias', [CuentasBancariasController::class, 'cuentas_bancarias']);
-Route::get('/cuentasbancoseleccionado', [CuentasBancariasController::class, 'cuentas_banco_seleccionado']);
+Route::controller(CuentasBancariasController::class)->group(function () {
+    Route::get('/cuentasBancarias', 'cuentas_bancarias');
+    Route::get('/cuentasbancoseleccionado', 'cuentas_banco_seleccionado');
+});
 
-Route::get('/obtenerEstadosMexicanos', [AreasGeograficasController::class, 'estadosMexicanos']);
-Route::get('/localidadesEstado', [AreasGeograficasController::class, 'localidades_estado']);
+Route::controller(AreasGeograficasController::class)->group(function () {
+    Route::get('/obtenerEstadosMexicanos', 'estadosMexicanos');
+    Route::get('/localidadesEstado', 'localidades_estado');
+});
 
-Route::post('/subirArchivo', [ProcesosController::class, 'subir_archivo']);
+Route::controller(ProcesosController::class)->group(function () {
+    Route::post('/subirArchivo', 'subir_archivo');
+});

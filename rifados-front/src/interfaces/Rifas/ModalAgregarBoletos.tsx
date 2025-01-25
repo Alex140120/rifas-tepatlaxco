@@ -60,6 +60,8 @@ export default function ModalAgregarBoletos({
   const [contenido, setContenido] = useState<JSX.Element>(<></>);
   const [alerta, setAlerta] = useState<JSX.Element>(<></>);
 
+  const [archivoSubido, setArchivoSubido] = useState<boolean>(false);
+
   const [mostrarOcultarBtn, setMostrarOcultarBtn] = useState<boolean>(false);
 
   useEffect(() => {
@@ -120,7 +122,8 @@ export default function ModalAgregarBoletos({
     try {
       const response = await instance.post("/subirArchivo", formData);
       
-      console.log(response.data);
+      //console.log(response.data);
+      setArchivoSubido(response.data.response);
       
     } catch (error) {
       console.log(error);
@@ -333,7 +336,8 @@ export default function ModalAgregarBoletos({
       estado !== "" &&
       localidad !== "" &&
       domicilio !== "" &&
-      codigoPostal !== ""
+      codigoPostal !== "" &&
+      archivoSubido
     ) {
       const datos = {
         nombre,

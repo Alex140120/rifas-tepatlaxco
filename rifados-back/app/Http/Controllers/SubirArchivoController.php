@@ -77,7 +77,7 @@ class SubirArchivoController extends Controller
                     $temp_archivo = $request->file('archivo')->path();
 
                     if (!file_exists($path)) {
-                        $codigo_transaccion = move_uploaded_file($temp_archivo, $path) ? $nuevo_nombreArchivo : 0;
+                        $codigo_transaccion = move_uploaded_file($temp_archivo, $path) ? 1 : 0;
                     }
                     # Archivo Existente
                     else {

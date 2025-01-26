@@ -9,4 +9,7 @@ export default defineConfig({
     //host: '192.168.1.73',
     //port: 3000,
   },
+  optimizeDeps: {
+    include: ['react-toastify']
+  }
 })

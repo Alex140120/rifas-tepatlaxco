@@ -496,3 +496,7 @@ select {
 .card-login {
   box-shadow: 0 0 15px 3px #070707;
 }
+
+.shadow-grey {
+  box-shadow: 0 0 15px 3px #c4c4c4;
+}

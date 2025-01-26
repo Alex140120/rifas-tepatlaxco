@@ -4,6 +4,8 @@ import Home from "./components/Home/Home";
 import Rifas from "./interfaces/Rifas";
 import MetodosPago from "./interfaces/MetodosPago";
 import Login from "./interfaces/Login/Login";
+import Panel from "./interfaces/Panel/Panel";
+import Inautorizado from "./interfaces/Errors/Inautorizado";
 
 const Router = () => {
   return (
@@ -15,7 +17,9 @@ const Router = () => {
         <Route path="rifas" element={<Rifas />} />
         <Route path="metodosPago" element={<MetodosPago />} />
       </Route>
-      <Route path="adms" element={<Login />} />
+      <Route path="/adms" element={<Login />} />
+      <Route path="/panel" element={<Panel />} />
+      <Route path="/inautorizado" element={<Inautorizado />} />
     </Routes>
   );
 };

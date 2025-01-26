@@ -1,24 +1,93 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { ToastContainer } from "react-toastify";
+import { notifyError, notifyWarning } from "../../components/Alertas/Alertas";
+import instance from "../../api/axios";
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [usuario, setUsuario] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [password2, setPassword2] = useState<string>("");
 
-  const [disabled, setDisabled] = useState<boolean>(true);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (password2 && password && usuario) {
+  const handleAccederSistema = () => {
+    if (usuario && password && password2) {
       if (password === password2) {
-        setDisabled(false);
+        //notifySuccess("Bienvenido al sistema", "top-center");
+        confirmarCredenciales(usuario, password);
       } else {
-        setDisabled(true);
+        notifyError("Las contraseñas no coinciden", "top-center");
+      }
+    } else {
+      notifyWarning("Debes llenar todos los campos", "top-center");
+    }
+  };
+
+  const confirmarCredenciales = async (usuario: string, password: string) => {
+    const datos = { usuario, password };
+
+    try {
+      const response = await instance.post("/login", datos);
+
+      const { data } = response;
+
+      if (data.output) {
+        // obtener el token
+        const token = data.token;
+        localStorage.setItem("key", token);
+
+        let timerInterval: any;
+        Swal.fire({
+          icon: "success",
+          title: `<p style="font-size:16px;margin:0px">¡Hola ${usuario}!</p>`,
+          html: '<p style="font-size:14px;margin:0px">Iniciando sesión en <b></b> milisegundos.</p>',
+          timer: 2500,
+          timerProgressBar: true,
+          didOpen: () => {
+            Swal.showLoading();
+            const timer = Swal.getPopup()?.querySelector("b");
+            if (timer) {
+              timerInterval = setInterval(() => {
+                timer.textContent = `${Swal.getTimerLeft()}`;
+              }, 100);
+            }
+          },
+          willClose: () => {
+            clearInterval(timerInterval);
+          },
+        }).then((result) => {
+          if (result.dismiss === Swal.DismissReason.timer) {
+            navigate("/panel");
+          } else {
+            navigate("/panel");
+          }
+        });
+      }
+    } catch (error: any) {
+      if (error.response) {
+        // obtener el status y los datos de la respuesta
+        const { status, data } = error.response;
+
+        if (status === 404) {
+          notifyError("Usuario no encontrado", "top-center");
+        } else if (status === 401) {
+          notifyError("Contraseña incorrecta", "top-center");
+        } else {
+          notifyError("Ocurrió un error inesperado", "top-center");
+        }
+        console.log("Detalles del error:", data);
+      } else {
+        // Si no hay `response` (error de red u otro problema)
+        console.log("Error de red o configuración:", error.message);
+        notifyError(
+          "Ocurrió un problema al comunicarse con el servidor",
+          "top-center"
+        );
       }
     }
-    else {
-        setDisabled(true);
-    }
-  }, [usuario, password, password2]);
+  };
 
   return (
     <div
@@ -69,11 +138,12 @@ export default function Login() {
           />
         </div>
         <div className="d-flex justify-content-center text-dark">
-          <button className="button" disabled={disabled}>
+          <button className="button" onClick={() => handleAccederSistema()}>
             Entrar
           </button>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 }

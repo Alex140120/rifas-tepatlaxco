@@ -9,6 +9,13 @@ use Illuminate\Support\Facades\DB;
 
 class AdminstradoresController extends Controller
 {
+    private $usuario;
+
+    public function __construct()
+    {
+        $this->usuario = auth()->user();
+    }
+
     public function logueoAdministradores(Request $request)
     {
         // Validar datos
@@ -48,16 +55,16 @@ class AdminstradoresController extends Controller
         ], 200);
     }
 
-    public function informacion()
+    public function informacionLogueo()
     {
         // Obtener la información del usuario autenticado
-        $usuario = auth()->user();
+        $nombres = "{$this->usuario->nombres} {$this->usuario->apellido_p}";
 
         // Retornar la información del usuario
         return response()->json([
             'output' => true,
             'message' => 'Información del usuario',
-            'usuario' => $usuario,
+            'usuario' => $nombres,
         ], 200);
     }
 }

@@ -500,3 +500,35 @@ select {
 .shadow-grey {
   box-shadow: 0 0 15px 3px #c4c4c4;
 }
+
+.aside {
+  width: 15%;
+}
+
+.principal {
+  width: 85%;
+}
+
+.btn-aside {
+  background-color: #016e5c !important;
+  color: #fff !important;
+  border: none !important;
+  border-bottom: 1px solid #222222 !important;
+  text-align: start !important;
+}
+
+.btn-aside:hover {
+  background-color: #015e4e !important;
+}
+
+.btn-close-sesion {
+  height: 40px !important;
+  margin-left: auto !important;
+}
+
+@media (max-width: 770px) {
+  .btn-close-sesion {
+    margin-left: 0 !important;
+    margin-top: 10px !important;
+  }
+}

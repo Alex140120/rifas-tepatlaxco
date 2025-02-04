@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import { notifyError, notifyWarning } from "../../components/Alertas/Alertas";
 import instance from "../../api/axios";
@@ -11,6 +11,14 @@ export default function Login() {
   const [password2, setPassword2] = useState<string>("");
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+      const token = localStorage.getItem("key");
+  
+      if (token) {
+        navigate("/panel");
+      }
+    }, []);
 
   const handleAccederSistema = () => {
     if (usuario && password && password2) {

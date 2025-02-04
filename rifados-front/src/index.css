@@ -1,3 +1,7 @@
+* {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
 .body-main {
   background-color: #eee;
 }
@@ -422,6 +426,14 @@ select {
   border: 1px solid #979797 !important;
 }
 
+.text-grey {
+  color: #414141;
+}
+
+textarea {
+  outline: none !important;
+}
+
 @media (max-width: 1000px) {
   .translucent-black {
     width: 75%;
@@ -530,5 +542,13 @@ select {
   .btn-close-sesion {
     margin-left: 0 !important;
     margin-top: 10px !important;
+  }
+
+  .btn-aside {
+    text-align: center !important;
+  }
+
+  .text-button {
+    display: none !important;
   }
 }

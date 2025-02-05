@@ -10,7 +10,11 @@ interface Props {
   multiple: boolean;
 }
 
-export default function InputFile({ onFormDataReady, extensiones, multiple }: Props) {
+export default function InputFile({
+  onFormDataReady,
+  extensiones,
+  multiple,
+}: Props) {
   const [nombreArchivo, setNombreArchivo] = useState<string>("");
 
   const handleSelecionarArchivos = async (e: any) => {

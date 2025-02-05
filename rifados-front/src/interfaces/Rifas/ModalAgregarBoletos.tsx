@@ -2,7 +2,6 @@ import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import {
   faArrowUp19,
   faCreditCard,
-  faFileUpload,
   faHashtag,
   faMap,
   faMapLocation,
@@ -281,6 +280,7 @@ export default function ModalAgregarBoletos({
               <div className="col-lg-12 col-md-12 col-xs-12 mb-2">
                 <InputFile
                   extensiones=".pdf"
+                  multiple={false}
                   onFormDataReady={handleSubirArchivo}
                 />
               </div>

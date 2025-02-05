@@ -1,10 +1,27 @@
 import { useState } from "react";
 import InputText from "../../components/Tags/InputText";
 import TextArea from "../../components/Tags/TextArea";
+import InputFile from "../../components/Archivos/InputFile";
+import instance from "../../api/axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSave } from "@fortawesome/free-solid-svg-icons";
 
 export default function NuevaRifa() {
   const [nombreProducto, setNombreProducto] = useState<string>("");
   const [descripcionProducto, setDescripcionProducto] = useState<string>("");
+
+  const [archivoSubido, setArchivoSubido] = useState<boolean>(false);
+
+  const handleSubirArchivo = async (formData: FormData) => {
+    try {
+      const response = await instance.post("/subirArchivo", formData);
+
+      //console.log(response.data);
+      setArchivoSubido(response.data.response);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div>
@@ -27,6 +44,19 @@ export default function NuevaRifa() {
               valor={descripcionProducto}
               onChange={(e) => setDescripcionProducto(e.target.value)}
             />
+          </div>
+          <div className="col-lg-12 col-md-12 col-sm-12">
+            <InputFile
+              extensiones=".jpg, .jpeg, .png"
+              multiple={true}
+              onFormDataReady={handleSubirArchivo}
+            />
+          </div>
+          <div className="w-100 d-flex justify-content-center align-items-center mt-3">
+            <button className="t1 btn-aside border rounded-2 p-3">
+              <FontAwesomeIcon icon={faSave} className="me-2" />
+              Guardar Rifa
+            </button>
           </div>
         </div>
       </div>

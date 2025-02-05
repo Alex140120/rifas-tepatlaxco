@@ -22,7 +22,7 @@ export default function InputText({
         type="text"
         id="nombre"
         name="nombre"
-        className="w-100 p-2 t2 text-grey border rounded-1"
+        className="w-100 p-2 t2 text-grey border rounded-1 bg-light"
         onChange={onChange}
         onBlur={onBlur}
       />

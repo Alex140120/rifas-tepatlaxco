@@ -538,6 +538,56 @@ textarea {
   margin-left: auto !important;
 }
 
+.button-add-files {
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #ddd;
+  padding: 15px !important;
+}
+
+.button-add-files:hover {
+  background: #e0e0e0;
+  border: 1px solid #9c9c9c;
+}
+
+.files-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ddd;
+  box-shadow: 0px 3px 10px 2px #dbdbdb;
+}
+
+.files-table thead th {
+  background-color: #f2f2f2;
+  border-bottom: 1px solid #ddd;
+  padding: 5px 10px;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.files-table tbody td {
+  border-bottom: 1px solid #ddd;
+  padding: 5px 10px;
+  font-size: 15px;
+}
+
+.button-delete-file {
+  background: #e73e3e;
+  color: #fff;
+  border: none;
+  border-radius: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3px 5px;
+}
+
+.button-delete-file:hover {
+  background: #b11b1b;
+}
+
 @media (max-width: 770px) {
   .btn-close-sesion {
     margin-left: 0 !important;

@@ -16,7 +16,7 @@ import ModalMetodosdePago from "./ModalMetodosdePago";
 import Alerta from "../../components/Alertas/Alerta";
 import Swal from "sweetalert2";
 import instance from "../../api/axios";
-import InputFile from "../../components/Archivos/InputFile";
+import InputFile from "../../components/Tags/InputFile";
 
 interface Props {
   show: boolean;

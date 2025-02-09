@@ -121,7 +121,7 @@ export default function ModalAgregarBoletos({
     try {
       const response = await instance.post("/subirArchivo", formData);
       
-      //console.log(response.data);
+      console.log(response.data);
       setArchivoSubido(response.data.response);
       
     } catch (error) {
@@ -322,6 +322,7 @@ export default function ModalAgregarBoletos({
     codigoPostal,
     alerta,
     mostrarOcultarBtn,
+    archivoSubido
   ]);
 
   const handleChangeNumero = (numero: any) => {
@@ -330,6 +331,17 @@ export default function ModalAgregarBoletos({
   };
 
   const handleGuardarDatos = () => {
+    const datos = {
+      nombre,
+      numTelefono,
+      estado,
+      localidad,
+      domicilio,
+      codigoPostal,
+      archivoSubido
+    };
+    console.log(datos);
+    
     if (
       nombre !== "" &&
       numTelefono !== "" &&

@@ -68,7 +68,7 @@ export default function Panel() {
         </div>
       </div>
       <div className="d-flex p-0 m-0">
-        <aside className="aside">
+        <aside className="aside h-100">
           <button
             className="btn-aside w-100 p-2 outline-none rounded-0"
             onClick={() => ActualizarMain("usuarios")}

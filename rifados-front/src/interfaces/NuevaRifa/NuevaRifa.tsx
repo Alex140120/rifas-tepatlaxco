@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import InputText from "../../components/Tags/InputText";
 import TextArea from "../../components/Tags/TextArea";
-//import instance from "../../api/axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFolderOpen,
@@ -9,6 +8,13 @@ import {
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
+import { postData } from "../../api/apiRequest";
+import { ToastContainer } from "react-toastify";
+import { notifySuccess, notifyError } from "../../components/Alertas/Alertas";
+
+interface ResponseI {
+  output: boolean;
+}
 
 export default function NuevaRifa() {
   const [nombreProducto, setNombreProducto] = useState<string>("");
@@ -20,6 +26,9 @@ export default function NuevaRifa() {
   const [disBtnAddFiles, setDisBtnAddFiles] = useState<boolean>(true);
   const [arrayNombreArchivos, setArrayNombreArchivos] = useState<string[]>([]);
   const [arrayArchivos, setArrayArchivos] = useState<File[]>([]);
+
+  const [cantidadBoletos, setCantidadBoletos] = useState<string>("");
+  const [disCantidadBoletos, setDisCantidadBoletos] = useState<boolean>(true);
 
   const [disabled, setDisabled] = useState<boolean>(true);
 
@@ -148,8 +157,7 @@ export default function NuevaRifa() {
   useEffect(() => {
     if (nombreProducto) {
       setDisDescripcionProducto(false);
-    }
-    else {
+    } else {
       setDisDescripcionProducto(true);
       setDescripcionProducto("");
     }
@@ -159,8 +167,7 @@ export default function NuevaRifa() {
   useEffect(() => {
     if (descripcionProducto) {
       setDisBtnAddFiles(false);
-    }
-    else {
+    } else {
       setDisBtnAddFiles(true);
       setArrayArchivos([]);
       setArrayNombreArchivos([]);
@@ -170,24 +177,61 @@ export default function NuevaRifa() {
   // onChange Files
   useEffect(() => {
     if (arrayNombreArchivos.length > 0) {
+      setDisCantidadBoletos(false);
+    } else {
+      setDisCantidadBoletos(true);
+      setCantidadBoletos("");
+    }
+  }, [arrayNombreArchivos]);
+
+  // onChange Cantidad Boletos
+  useEffect(() => {
+    if (cantidadBoletos && cantidadBoletos !== "0") {
       setDisabled(false);
     } else {
       setDisabled(true);
     }
-  }, [arrayNombreArchivos]);
+  }, [cantidadBoletos]);
+
+  const handleGuardarNuevaRifa = async () => {
+    const formData = new FormData();
+
+    formData.append("nombreProducto", nombreProducto);
+    formData.append("descripcionProducto", descripcionProducto);
+    formData.append("cantidadBoletos", cantidadBoletos);
+    for (let i = 0; i < arrayArchivos.length; i++) {
+      formData.append("archivos[]", arrayArchivos[i]);
+    }
+
+    try {
+      const response = await postData<ResponseI>("guardarNuevaRifa", formData);
+      if (response.output) {
+        notifySuccess("El producto se ha guardado exitosamente.", "top-center");
+        setNombreProducto("");
+        setDescripcionProducto("");
+        setArrayArchivos([]);
+        setCantidadBoletos("");
+      } else {
+        notifyError("Hubo un error al guardar el producto.", "top-center");
+      }
+    } catch (error) {
+      console.error("Error al guardar nueva rifa:", error);
+    }
+  };
 
   return (
-    <div>
+    <div className="container-modulo px-3 py-2 rounded-3">
       <h2>Nueva Rifa</h2>
       <hr />
-      <div className="w-100">
-        <div className="row">
+      <div className="w-100 px-3">
+        <div className="row border pb-3 ">
           <div className="col-lg-6 col-md-6 col-sm-12">
             <InputText
               disabled={false}
               placeHolder="Nombre del Producto"
               valor={nombreProducto}
-              onChange={(e) => setNombreProducto(e.target.value)}
+              tipoValor="texto"
+              onChange={(e) => setNombreProducto(e)}
             />
           </div>
           <div className="col-lg-12 col-md-12 col-sm-12 mt-3">
@@ -254,12 +298,22 @@ export default function NuevaRifa() {
             ) : null}
           </div>
 
+          <div className="col-lg-12 col-md-12 col-sm-12">
+            <InputText
+              disabled={disCantidadBoletos}
+              placeHolder="Cantidad de Boletos"
+              valor={cantidadBoletos}
+              tipoValor="numero"
+              onChange={(valor) => setCantidadBoletos(valor)}
+            />
+          </div>
+
           <div className="w-100 d-flex justify-content-center align-items-center mt-3">
             <button
               className="t1 btn-aside border rounded-2 p-3"
               disabled={disabled}
               onClick={() => {
-                //handleGuardarRifa()
+                handleGuardarNuevaRifa();
               }}
             >
               <FontAwesomeIcon icon={faSave} className="me-2" />
@@ -268,6 +322,7 @@ export default function NuevaRifa() {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 }

@@ -27,6 +27,7 @@ Route::post("/login", [AdminstradoresController::class, 'logueoAdministradores']
 Route::middleware('auth:sanctum')->group(function () {
     Route::controller(AdminstradoresController::class)->group(function () {
         Route::get('/informacion', 'informacionLogueo');
+        Route::post('/guardarNuevaRifa', 'guardarNuevaRifa');
     });
 });
 

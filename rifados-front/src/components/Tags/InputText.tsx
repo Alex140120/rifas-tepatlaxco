@@ -1,8 +1,9 @@
 interface Props {
   disabled: boolean;
   placeHolder: string;
-  valor: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  valor: string | number;
+  tipoValor: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement> | any) => void;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
@@ -10,9 +11,20 @@ export default function InputText({
   disabled,
   placeHolder,
   valor,
+  tipoValor,
   onChange,
   onBlur,
 }: Props) {
+  function verificarValor(valor: any) {
+    if (tipoValor === "numero") {
+      if (isNaN(valor)) {
+        return "";
+      }
+      return valor;
+    }
+    return valor;
+  }
+
   return (
     <div>
       <input
@@ -23,7 +35,10 @@ export default function InputText({
         id="nombre"
         name="nombre"
         className="w-100 p-2 t2 text-grey border rounded-1 bg-light"
-        onChange={onChange}
+        onChange={(e) => {
+          const valor = verificarValor(e.target.value);
+          onChange(valor);
+        }}
         onBlur={onBlur}
       />
     </div>

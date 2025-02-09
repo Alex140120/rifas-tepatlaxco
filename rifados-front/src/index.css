@@ -12,6 +12,10 @@ body {
   font-family: sans-serif;
 }
 
+aside {
+  box-shadow: 0 10px 5px 5px #d1d1d1;
+}
+
 .button {
   border-radius: 5px;
   border: 1px solid rgb(97, 97, 97);
@@ -586,6 +590,10 @@ textarea {
 
 .button-delete-file:hover {
   background: #b11b1b;
+}
+
+.container-modulo {
+  box-shadow: 0 0 5px 5px #e0e0e0;
 }
 
 @media (max-width: 770px) {

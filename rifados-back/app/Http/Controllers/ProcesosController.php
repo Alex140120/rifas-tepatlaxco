@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class ProcesosController extends Controller
+{
+    public function subir_archivo(Request $request)
+    {
+        $response = app('App\Http\Controllers\SubirArchivoController')->SubirArchivo($request, 'archivos', true);
+        $output = $response[0] === 1 ? true : false;
+
+        return response()->json([
+            'response' => $output
+        ]);
+    }
+}

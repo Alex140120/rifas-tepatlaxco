@@ -205,17 +205,34 @@ export default function NuevaRifa() {
 
     try {
       const response = await postData<ResponseI>("guardarNuevaRifa", formData);
-      if (response.output) {
+
+      const { status } = response;
+
+      console.log(response);
+      
+
+      if (status === 200) {
         notifySuccess("El producto se ha guardado exitosamente.", "top-center");
         setNombreProducto("");
         setDescripcionProducto("");
         setArrayArchivos([]);
         setCantidadBoletos("");
-      } else {
-        notifyError("Hubo un error al guardar el producto.", "top-center");
       }
-    } catch (error) {
-      console.error("Error al guardar nueva rifa:", error);
+    } catch (error: any) {
+      if (error.response) {
+        // obtener el status y los datos de la respuesta
+        const { status, data } = error.response;
+        console.log(`status: ${status} | error: `, data.error);
+
+        notifyError("Hubo un error al guardar el producto.", "top-center");
+      } else {
+        // Si no hay `response` (error de red u otro problema)
+        console.log("Error de red o configuración:", error.message);
+        notifyError(
+          "Ocurrió un problema al comunicarse con el servidor",
+          "top-center"
+        );
+      }
     }
   };
 

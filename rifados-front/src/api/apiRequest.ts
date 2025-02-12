@@ -7,25 +7,25 @@ const headers = {
 };
 
 // Especificamos el tipo genérico para los métodos GET y POST
-export const getData = async <T>(ruta: string, datos: object | FormData | null): Promise<T> => {
+export const getData = async <T>(ruta: string, datos: object | FormData | null): Promise<AxiosResponse<T>> => {
     try {
       const response: AxiosResponse<T> = await instance.get(`/${ruta}`, {
         params: datos,
         headers,
       });
-      return response.data;
+      return response;
     } catch (error) {
-      return error as T; // Aquí también puedes manejar el error si es necesario
+      throw error as T; // Aquí también puedes manejar el error si es necesario
     }
   };
   
-  export const postData = async <T>(ruta: string, datos: object | FormData | null): Promise<T> => {
+  export const postData = async <T>(ruta: string, datos: object | FormData | null): Promise<AxiosResponse<T>> => {
     try {
       const response: AxiosResponse<T> = await instance.post(`/${ruta}`, datos, {
         headers,
       });
-      return response.data;
+      return response;
     } catch (error) {
-      return error as T; // Aquí también puedes manejar el error si es necesario
+      throw error as T; // Aquí también puedes manejar el error si es necesario
     }
   };

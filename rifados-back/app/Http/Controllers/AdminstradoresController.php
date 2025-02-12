@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\usuarios;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -87,93 +88,94 @@ class AdminstradoresController extends Controller
         $extensiones_permitidas = ["jpg", "png", "jpeg"];
         $output = false;
 
-        $id_nuevoProducto = DB::table('productos')->insertGetId(
-            [
-                'nombre'        => $nombreProducto,
-                'descripcion'   => $descripcionProducto,
-                'id_usuario'    => $id_usuario,
-                'en_rifa'       => $status_enRifa,
-                'boletos'       => $cantidadBoletos
-            ]
-        );
+        try {
+            $id_nuevoProducto = DB::table('productos')->insertGetId(
+                [
+                    'nombre'        => $nombreProducto,
+                    'descripcion'   => $descripcionProducto,
+                    'id_usuario'    => $id_usuario,
+                    'en_rifa'       => $status_enRifa,
+                    'boletos'       => $cantidadBoletos
+                ]
+            );
 
-        if (!$id_nuevoProducto || $id_nuevoProducto === null) {
-            return response()->json([
-                'output' => false,
-                'mensaje' => "no se pudo registrar producto"
-            ], 500);
-        }
+            // Guadar los archivos del nuevo producto
+            if ($id_nuevoProducto) {
+                if ($request->hasFile('archivos')) {
 
-        // Guadar los archivos del nuevo producto
-        if ($request->hasFile('archivos')) {
+                    # Recorre archivo por archivo
+                    foreach ($request->file('archivos') as $archivo) {
 
-            # Recorre archivo por archivo
-            foreach ($request->file('archivos') as $archivo) {
+                        $pref1 = substr(md5(uniqid(rand())), 0, 6);
+                        $separa = "_";
 
-                $pref1 = substr(md5(uniqid(rand())), 0, 6);
-                $separa = "_";
+                        $nombreArchivo = $archivo->getClientOriginalName(); # nombre del archivo;
+                        $nombreArchivoRuta = $pref1 . $separa . $nombreArchivo;
 
-                $nombreArchivo = $archivo->getClientOriginalName(); # nombre del archivo;
-                $nombreArchivoRuta = $pref1 . $separa . $nombreArchivo;
+                        $tamano_archivo = $archivo->getSize(); # tamaño del archivo
 
-                $tamano_archivo = $archivo->getSize(); # tamaño del archivo
+                        $extension_archivo = strtolower($archivo->getClientOriginalExtension()); # extensión de archivo
 
-                $extension_archivo = strtolower($archivo->getClientOriginalExtension()); # extensión de archivo
+                        # Buscar la extension del archivo en el arreglo de las permitidas
+                        if (in_array($extension_archivo, $extensiones_permitidas)) {
+                            # verificar el tamaño
+                            if ($tamano_Permitido >= $tamano_archivo) {
 
-                # Buscar la extension del archivo en el arreglo de las permitidas
-                if (in_array($extension_archivo, $extensiones_permitidas)) {
-                    # verificar el tamaño
-                    if ($tamano_Permitido >= $tamano_archivo) {
+                                $carpeta = public_path("productos");
+                                # Produccion
+                                // $carpeta = base_path("../public_html/$nomFolder");
 
-                        $carpeta = public_path("productos");
-                        # Produccion
-                        // $carpeta = base_path("../public_html/$nomFolder");
+                                # Si no existe la carpeta, crearla
+                                if (!file_exists($carpeta)) {
+                                    mkdir($carpeta, 0777, true);
+                                }
 
-                        # Si no existe la carpeta, crearla
-                        if (!file_exists($carpeta)) {
-                            mkdir($carpeta, 0777, true);
+                                # ==================== mover a la carpeta destino ==================
+                                # PARA LOCAL
+                                $archivo->move($carpeta, $nombreArchivoRuta);
+                                # PARA PRODUCCION
+                                //$archivo->move(base_path('../public_html/avisos'), $nombreArchivoRuta);
+
+                                $ruta = "../productos/$nombreArchivoRuta";
+
+                                DB::table('imagenesproductos')->insert(
+                                    [
+                                        'ruta'          => $ruta,
+                                        'nombrearchivo' => $nombreArchivoRuta,
+                                        'id_producto'   => $id_nuevoProducto
+                                    ]
+                                );
+                                $output = true;
+                                $alerta = true;
+                                $msj = true;
+                            }
+                            # Fallo del tamaño
+                            else {
+                                $output = false;
+                                $alerta = 'error';
+                                $msj = 'El tamaño del archivo excede el límite permitido.';
+                            }
                         }
-
-                        # ==================== mover a la carpeta destino ==================
-                        # PARA LOCAL
-                        $archivo->move($carpeta, $nombreArchivoRuta);
-                        # PARA PRODUCCION
-                        //$archivo->move(base_path('../public_html/avisos'), $nombreArchivoRuta);
-
-                        $ruta = "../productos/$nombreArchivoRuta";
-
-                        DB::table('imagenesproductos')->insert(
-                            [
-                                'ruta'          => $ruta,
-                                'nombrearchivo' => $nombreArchivoRuta,
-                                'id_producto'   => $id_nuevoProducto
-                            ]
-                        );
-                        $output = true;
-                        $alerta = true;
-                        $msj = true;
+                        # Fallo de extensión
+                        else {
+                            $output = false;
+                            $alerta = 'error';
+                            $msj = 'El archivo seleccionado tiene una extensión inválida.';
+                        }
                     }
-                    # Fallo del tamaño
-                    else {
-                        $output = false;
-                        $alerta = 'error';
-                        $msj = 'El tamaño del archivo excede el límite permitido.';
-                    }
-                }
-                # Fallo de extensión
-                else {
-                    $output = false;
-                    $alerta = 'error';
-                    $msj = 'El archivo seleccionado tiene una extensión inválida.';
                 }
             }
-        }
 
-        return response()->json([
-            'output' => $output,
-            'alerta' => $alerta,
-            'msj'   => $msj
-        ]);
+            return response()->json([
+                'output' => $output,
+                'alerta' => $alerta,
+                'msj'   => $msj
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function guardar_archivos_aviso(Request $request)

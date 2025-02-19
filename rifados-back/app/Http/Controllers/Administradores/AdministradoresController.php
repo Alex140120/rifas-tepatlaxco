@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Administradores;
 
 use App\Http\Controllers\Controller;
 use App\Models\usuarios;
@@ -8,7 +8,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class AdminstradoresController extends Controller
+class AdministradoresController extends Controller
 {
     private $usuario;
 
@@ -236,5 +236,27 @@ class AdminstradoresController extends Controller
         }
 
         return response()->json(['alerta' => $alerta, 'msj' => $msj]);
+    }
+
+    public function productosRegistrados()
+    {
+        try {
+
+            $prodcutos = DB::table('productos as ta')
+                ->leftJoin('usuarios as tb', 'tb.id', '=', 'ta.id_usuario')
+                ->select(
+                    'ta.id',
+                    'ta.nombre',
+                    'ta.descripcion',
+                    'ta.en_rifa as statusRifa',
+                    'ta.boletos',
+                    DB::raw("CONCAT(tb.nombres, ' ', tb.apellido_p, ' ', tb.apellido_m) as nombreUser")
+                )
+                ->get();
+
+            return response()->json(['productos' => $prodcutos], 200);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

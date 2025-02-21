@@ -16,7 +16,9 @@ interface FilasI {
   statusRifa: number;
   boletos: number;
   nombreUser: string;
+  [key: string]: any;  // Firma de índice añadida
 }
+
 
 interface ResponseI {
   productos: FilasI[];
@@ -33,7 +35,17 @@ export default function ProductosRifados() {
 
   const [filas, setFilas] = useState<FilasI[]>([]);
 
-  const renderColumnContent = () => {};
+  const renderColumnContent = (field: string, rowData: FilasI) => {
+    if (field === "statusRifa") {
+      return (
+        <>
+          <span className="bg-danger p-1">{rowData.statusRifa}</span>
+        </>
+      );
+    } else {
+      return rowData[field];
+    }
+  };
 
   // Extraer productos
   useEffect(() => {

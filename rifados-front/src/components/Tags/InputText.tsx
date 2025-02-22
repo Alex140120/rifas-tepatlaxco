@@ -34,7 +34,7 @@ export default function InputText({
         type="text"
         id="nombre"
         name="nombre"
-        className="w-100 p-2 t2 text-grey border rounded-1 bg-light"
+        className="w-100 p-2 t3 text-grey border rounded-1 bg-light"
         onChange={(e) => {
           const valor = verificarValor(e.target.value);
           onChange(valor);

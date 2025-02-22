@@ -248,8 +248,9 @@ class AdministradoresController extends Controller
                     'ta.id',
                     'ta.nombre',
                     'ta.descripcion',
-                    'ta.en_rifa as statusRifa',
                     'ta.boletos',
+                    'ta.en_rifa AS status',
+                    DB::raw("IF(ta.en_rifa = 1, 'En Rifa', 'Finalizado') AS statusRifa"),
                     DB::raw("CONCAT(tb.nombres, ' ', tb.apellido_p, ' ', tb.apellido_m) as nombreUser")
                 )
                 ->get();

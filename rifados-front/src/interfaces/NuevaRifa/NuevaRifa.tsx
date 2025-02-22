@@ -240,8 +240,8 @@ export default function NuevaRifa() {
     <div className="container-modulo px-3 py-2 rounded-3">
       <h2>Nueva Rifa</h2>
       <hr />
-      <div className="w-100 px-3">
-        <div className="row border pb-3 ">
+      <div className="w-100">
+        <div className="row pb-3">
           <div className="col-lg-6 col-md-6 col-sm-12">
             <InputText
               disabled={false}
@@ -284,7 +284,7 @@ export default function NuevaRifa() {
             </div>
             {arrayNombreArchivos.length > 0 ? (
               <div className="mt-0">
-                <table className="t2 files-table">
+                <table className="t3 files-table">
                   <thead>
                     <tr>
                       <th>No.</th>
@@ -315,7 +315,7 @@ export default function NuevaRifa() {
             ) : null}
           </div>
 
-          <div className="col-lg-12 col-md-12 col-sm-12">
+          <div className="col-lg-12 col-md-12 col-sm-12 mt-3">
             <InputText
               disabled={disCantidadBoletos}
               placeHolder="Cantidad de Boletos"
@@ -327,7 +327,7 @@ export default function NuevaRifa() {
 
           <div className="w-100 d-flex justify-content-center align-items-center mt-3">
             <button
-              className="t1 btn-aside border rounded-2 p-3"
+              className="t1 btn-aside border rounded-2 p-2"
               disabled={disabled}
               onClick={() => {
                 handleGuardarNuevaRifa();

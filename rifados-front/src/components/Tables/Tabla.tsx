@@ -60,12 +60,12 @@ export default function Tabla({ columnas, filas, renderColumnContent }: Props) {
     <>
       <DataTable
         value={filteredRows} // Usa las filas filtradas
-        tableStyle={{ minWidth: "50rem"}}
+        tableStyle={{ minWidth: "50rem", textAlign: "center"}}
         scrollable
         scrollHeight="calc(100vh - 300px)"
         paginator
         rows={20}
-        rowsPerPageOptions={[4, 10, 25, 50]}
+        rowsPerPageOptions={[5, 10, 25, 50]}
         header={header}
         emptyMessage="No se encontraron resultados."
         className="t3 bg-info rounded-2"

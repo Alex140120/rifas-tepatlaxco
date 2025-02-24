@@ -209,7 +209,6 @@ export default function NuevaRifa() {
       const { status } = response;
 
       console.log(response);
-      
 
       if (status === 200) {
         notifySuccess("El producto se ha guardado exitosamente.", "top-center");
@@ -297,15 +296,17 @@ export default function NuevaRifa() {
                       <tr key={index}>
                         <td>{index + 1}</td>
                         <td>{file}</td>
-                        <td className="d-flex justify-content-center">
-                          <button
-                            className="button-delete-file"
-                            onClick={() => {
-                              eliminarArchivo(index);
-                            }}
-                          >
-                            <FontAwesomeIcon icon={faTimes} />
-                          </button>
+                        <td>
+                          <div className="w-100 d-flex">
+                            <button
+                              className="btn-danger-rifas m-auto rounded-1 t5"
+                              onClick={() => {
+                                eliminarArchivo(index);
+                              }}
+                            >
+                              <FontAwesomeIcon icon={faTimes} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

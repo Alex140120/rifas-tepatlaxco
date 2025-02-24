@@ -14,15 +14,21 @@ interface ColumnasI {
   header: string | number | boolean;
 }
 
+interface ImagenesI {
+  idimage: number;
+  ruta: string;
+  nombrearchivo: string;
+}
+
 interface FilasI {
   id: number;
   nombre: string;
   descripcion: string;
   status: number;
-  statusRifa: string;
   boletos: number;
   nombreUser: string;
   [key: string]: any; // Firma de índice añadida
+  imagenes: ImagenesI[];
 }
 
 interface ResponseI {
@@ -48,7 +54,8 @@ export default function ProductosRifados() {
   const handleShow = () => setShow(true);
   const handleClose = () => setShow(false);
 
-  const [productoSeleccionado, setProductoSeleccionado] = useState<FilasI | null>(null);
+  const [productoSeleccionado, setProductoSeleccionado] =
+    useState<FilasI | null>(null);
 
   const renderColumnContent = (field: string, rowData: FilasI) => {
     if (field === "statusRifa") {
@@ -140,7 +147,7 @@ export default function ProductosRifados() {
     try {
       const response = await getData<ResponseI>("productosRegistrados", null);
       const { status, data } = response;
-
+      console.log(data);
       if (status === 200) {
         setFilas(data.productos);
       }
@@ -344,6 +351,12 @@ export default function ProductosRifados() {
     }
   };
 
+  const actualizarTablaDatos = (retorno: boolean) => {
+    if (retorno) {
+      productosRegistrados();
+    }
+  };
+
   return (
     <div className="container-modulo px-3 py-2 rounded-3">
       <h2>Productos Rifados</h2>
@@ -363,7 +376,12 @@ export default function ProductosRifados() {
       )}
 
       <ToastContainer />
-      <ModalEditarProducto show={show} handleClose={handleClose} productoSeleccionado={productoSeleccionado} />
+      <ModalEditarProducto
+        show={show}
+        handleClose={handleClose}
+        productoSeleccionado={productoSeleccionado}
+        actualizar={(valor) => actualizarTablaDatos(valor)}
+      />
     </div>
   );
 }

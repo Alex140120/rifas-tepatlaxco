@@ -40,5 +40,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/productosRegistrados', 'productosRegistrados');
         Route::post('/actualizarEstadoProducto', 'actualizarEstadoProducto');
         Route::post('/eliminarProducto', 'eliminarProducto');
+        Route::post('/modificarProducto', 'modificarProducto');
     });
 });

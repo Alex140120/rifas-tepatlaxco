@@ -7,6 +7,8 @@ use App\Http\Controllers\Globales\AuthUserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+use function Laravel\Prompts\select;
+
 class ProductosRifadosController extends Controller
 {
     private $userAuth;
@@ -137,11 +139,26 @@ class ProductosRifadosController extends Controller
                     'ta.descripcion',
                     'ta.boletos',
                     'ta.en_rifa AS status',
-                    DB::raw("IF(ta.en_rifa = 1, 'En Rifa', 'Finalizado') AS statusRifa"),
                     DB::raw("CONCAT(tb.nombres, ' ', tb.apellido_p, ' ', tb.apellido_m) as nombreUser")
                 )
                 ->orderBy('id', 'DESC')
                 ->get();
+
+            $prodcutos = $prodcutos->map(function ($item) {
+                $idProducto = $item->id;
+
+                $imagenes = DB::table('imagenesproductos')
+                    ->where('id_producto', $idProducto)
+                    ->select(
+                        'id AS idimage',
+                        'ruta',
+                        'nombrearchivo'
+                    )
+                    ->get();
+
+                $item->imagenes = $imagenes;
+                return $item;
+            });
 
             return response()->json(['productos' => $prodcutos], 200);
         } catch (\Throwable $th) {
@@ -189,6 +206,33 @@ class ProductosRifadosController extends Controller
                 ->delete();
 
             return response()->json(['output' => true], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function modificarProducto(Request $request)
+    {
+        $paramsRequest = $request->validate([
+            'idProducto' => 'required|int',
+            'nombreProducto' => 'required|string',
+            'descripcionProducto' => 'required|string',
+            'cantidadBoletos' => 'required|int',
+        ]);
+
+        extract($paramsRequest);
+
+        try {
+
+            $actualiza = DB::table('productos')
+                ->where('id', $idProducto)
+                ->update([
+                    'nombre' => $nombreProducto,
+                    'descripcion' => $descripcionProducto,
+                    'boletos' => $cantidadBoletos
+                ]);
+
+            return response()->json(['output' => $actualiza], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }

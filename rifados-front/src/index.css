@@ -574,7 +574,7 @@ textarea {
 .files-table tbody td {
   border-bottom: 1px solid #ddd;
   padding: 5px 10px;
-  font-size: 15px;
+  font-size: 12px;
 }
 
 .button-delete-file {

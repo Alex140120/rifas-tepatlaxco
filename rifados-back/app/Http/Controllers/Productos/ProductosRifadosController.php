@@ -144,22 +144,6 @@ class ProductosRifadosController extends Controller
                 ->orderBy('id', 'DESC')
                 ->get();
 
-            $prodcutos = $prodcutos->map(function ($item) {
-                $idProducto = $item->id;
-
-                $imagenes = DB::table('imagenesproductos')
-                    ->where('id_producto', $idProducto)
-                    ->select(
-                        'id AS idimage',
-                        'ruta',
-                        'nombrearchivo'
-                    )
-                    ->get();
-
-                $item->imagenes = $imagenes;
-                return $item;
-            });
-
             return response()->json(['productos' => $prodcutos], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
@@ -201,11 +185,39 @@ class ProductosRifadosController extends Controller
 
         try {
 
-            DB::table('productos')
-                ->where('id', $idProducto)
-                ->delete();
+            DB::transaction(function () use ($idProducto) {
+                DB::table('productos')
+                    ->where('id', $idProducto)
+                    ->delete();
+
+                DB::table('imagenesproductos')->where('id_producto', $idProducto)->delete();
+            });
 
             return response()->json(['output' => true], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function extraerArchivosProducto(Request $request)
+    {
+        $paramRequest = $request->validate([
+            'idProducto' => 'required|int'
+        ]);
+
+        $idProducto = $paramRequest['idProducto'];
+
+        try {
+            $imagenes = DB::table('imagenesproductos')
+                ->where('id_producto', $idProducto)
+                ->select(
+                    'id AS idimage',
+                    'ruta',
+                    'nombrearchivo'
+                )
+                ->get();
+
+            return response()->json(['files' => $imagenes], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }
@@ -233,6 +245,24 @@ class ProductosRifadosController extends Controller
                 ]);
 
             return response()->json(['output' => $actualiza], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function eliminarImagenProducto(Request $request)
+    {
+        $paramRequest = $request->validate([
+            'idimage' => 'required|int'
+        ]);
+
+        $idimage = $paramRequest['idimage'];
+
+        try {
+
+            DB::table('imagenesproductos')->where('id', $idimage)->delete();
+
+            return response()->json(['output' => true], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }

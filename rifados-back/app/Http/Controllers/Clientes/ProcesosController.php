@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Clientes;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProcesosController extends Controller
 {
@@ -15,5 +16,43 @@ class ProcesosController extends Controller
         return response()->json([
             'response' => $output
         ]);
+    }
+
+    public function extraerProductoRifado()
+    {
+        // Extraer el producto en rifa
+        try {
+
+            $producto = DB::table('productos')
+                ->where('en_rifa', 1)
+                ->select(
+                    'id',
+                    'nombre',
+                    'descripcion',
+                    'boletos'
+                )
+                ->first();
+
+            if (!$producto) {
+                return response()->json(['message' => "Aún no hay producto en rifa."], 204);
+            }
+
+            $idProducto = $producto->id;
+
+            $imagenesProducto = DB::table('imagenesproductos')
+                ->where('id_producto', $idProducto)
+                ->select(
+                    'ruta',
+                    'nombrearchivo'
+                )
+                ->get();
+
+            // Agregar las imágenes al producto
+            $producto->imagenes = $imagenesProducto;
+
+            return response()->json(['producto' => $producto], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
     }
 }

@@ -32,6 +32,7 @@ Route::controller(AreasGeograficasController::class)->group(function () {
 
 Route::controller(ProcesosController::class)->group(function () {
     Route::post('/subirArchivo', 'subir_archivo');
+    Route::get('/extraerProductoRifado', 'extraerProductoRifado');
 });
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -40,6 +41,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/productosRegistrados', 'productosRegistrados');
         Route::post('/actualizarEstadoProducto', 'actualizarEstadoProducto');
         Route::post('/eliminarProducto', 'eliminarProducto');
+        Route::get('/extraerArchivosProducto', 'extraerArchivosProducto');
         Route::post('/modificarProducto', 'modificarProducto');
+        Route::post('/eliminarImagenProducto', 'eliminarImagenProducto');
     });
 });

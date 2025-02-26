@@ -12,7 +12,8 @@ import {
   notifyError,
   notifySuccess,
 } from "../../../components/Alertas/Alertas";
-import { postData } from "../../../api/apiRequest";
+import { getData, postData } from "../../../api/apiRequest";
+import Spinner from "../../../components/Tags/Spinner";
 
 interface ImagenesI {
   idimage: number;
@@ -28,7 +29,10 @@ interface FilasI {
   boletos: number;
   nombreUser: string;
   [key: string]: any; // Firma de índice añadida
-  imagenes: ImagenesI[];
+}
+
+interface ArchivosResponseI {
+  files: ImagenesI[];
 }
 
 interface Props {
@@ -44,6 +48,8 @@ export default function ModalEditarProducto({
   productoSeleccionado,
   actualizar,
 }: Props) {
+  const [carga, setCarga] = useState<boolean>(false);
+
   const [nombreProducto, setNombreProducto] = useState<string>("");
 
   const [descripcionProducto, setDescripcionProducto] = useState<string>("");
@@ -56,18 +62,46 @@ export default function ModalEditarProducto({
     if (show) {
       console.log(productoSeleccionado);
       if (productoSeleccionado) {
+        extraerArchivos(productoSeleccionado.id);
         setNombreProducto(productoSeleccionado.nombre);
         setDescripcionProducto(productoSeleccionado.descripcion);
-        setArchivos(productoSeleccionado.imagenes);
         setCantidadBoletos(productoSeleccionado.boletos.toString());
       }
     } else {
+      setCarga(false);
       setNombreProducto("");
       setDescripcionProducto("");
       setCantidadBoletos("");
       setRutaImagen("");
+      setArchivos([]);
     }
   }, [show]);
+
+  const extraerArchivos = async (idProducto: number) => {
+    try {
+      const response = await getData<ArchivosResponseI>(
+        "extraerArchivosProducto",
+        { idProducto }
+      );
+      const { status, data } = response;
+      if (status === 200) {
+        setArchivos(data.files);
+      }
+    } catch (error: any) {
+      if (error.response) {
+        // obtener el status y los datos de la respuesta
+        const { status, data } = error.response;
+        console.log(
+          `status: ${status} | error: ${data.error} | message: ${data.message}`
+        );
+      } else {
+        // Si no hay `response` (error de red u otro problema)
+        console.log("Error de red o configuración:", error.message);
+      }
+    } finally {
+      setCarga(true);
+    }
+  };
 
   const handleGuardarCambios = async () => {
     const datos = {
@@ -106,10 +140,31 @@ export default function ModalEditarProducto({
   };
 
   const eliminarArchivo = async (idimage: number) => {
-    const nuevosArchivos = archivos.filter((item) => item.idimage !== idimage);
-    setArchivos(nuevosArchivos);
-
-    console.log(idimage);
+    try {
+      const response = await postData("eliminarImagenProducto", { idimage });
+      const { status, data } = response;
+      if (status === 200) {
+        const nuevosArchivos = archivos.filter(
+          (item) => item.idimage !== idimage
+        );
+        setArchivos(nuevosArchivos);
+      }
+    } catch (error: any) {
+      if (error.response) {
+        notifyError(
+          "No se pudo eliminar la imágen, inténtalo nuevamente.",
+          "top-center"
+        );
+        // obtener el status y los datos de la respuesta
+        const { status, data } = error.response;
+        console.log(
+          `status: ${status} | error: ${data.error} | message: ${data.message}`
+        );
+      } else {
+        // Si no hay `response` (error de red u otro problema)
+        console.log("Error de red o configuración:", error.message);
+      }
+    }
   };
 
   const RecortarTexto = (texto: string, limite: number) => {
@@ -140,113 +195,115 @@ export default function ModalEditarProducto({
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div className="w-100">
-            {rutaImagen === "" ? (
-              <div>
-                <div className="w-100">
-                  <InputText
-                    disabled={false}
-                    placeHolder="Nombre del Producto"
-                    valor={nombreProducto}
-                    tipoValor="texto"
-                    onChange={(e) => setNombreProducto(e)}
-                  />
-                </div>
-                <div className="col-lg-12 col-md-12 col-sm-12 mt-3">
-                  <TextArea
-                    disabled={false}
-                    placeHolder="Descripción del producto"
-                    valor={descripcionProducto}
-                    onChange={(e) => setDescripcionProducto(e.target.value)}
-                  />
-                </div>
+          {carga ? (
+            <div className="w-100 expand-animation">
+              {rutaImagen === "" ? (
+                <div>
+                  <div className="w-100">
+                    <InputText
+                      disabled={false}
+                      placeHolder="Nombre del Producto"
+                      valor={nombreProducto}
+                      tipoValor="texto"
+                      onChange={(e) => setNombreProducto(e)}
+                    />
+                  </div>
+                  <div className="col-lg-12 col-md-12 col-sm-12 mt-3">
+                    <TextArea
+                      disabled={false}
+                      placeHolder="Descripción del producto"
+                      valor={descripcionProducto}
+                      onChange={(e) => setDescripcionProducto(e.target.value)}
+                    />
+                  </div>
 
-                <div className="col-lg-12 col-md-12 col-sm-12">
-                  {archivos.length > 0 ? (
-                    <div className="mt-0">
-                      <table className="t3 files-table">
-                        <thead>
-                          <tr>
-                            <th>No.</th>
-                            <th>Nombre</th>
-                            <th></th>
-                            <th className="text-center">Eliminar</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {archivos.map((file, index) => (
-                            <tr key={index}>
-                              <td>{index + 1}</td>
-                              <td>
-                                <span className="t3 p-0">
-                                  {RecortarTexto(file.nombrearchivo, 20)}
-                                </span>
-                              </td>
-                              <td>
-                                <a
-                                  className="text-primary"
-                                  style={{
-                                    cursor: "pointer",
-                                    textDecoration: "underline",
-                                  }}
-                                  onClick={() => vistaPreviaImagen(file.ruta)}
-                                >
-                                  Vista previa
-                                </a>
-                              </td>
-                              <td>
-                                <div className="w-100 d-flex">
-                                  <button
-                                    className="btn-danger-rifas m-auto rounded-1 t5 text-light"
-                                    onClick={() => {
-                                      eliminarArchivo(file.idimage);
-                                    }}
-                                  >
-                                    <FontAwesomeIcon icon={faTimes} />
-                                  </button>
-                                </div>
-                              </td>
+                  <div className="col-lg-12 col-md-12 col-sm-12 mt-3">
+                    {archivos.length > 0 ? (
+                      <div className="mt-0">
+                        <table className="t3 files-table">
+                          <thead>
+                            <tr>
+                              <th>No.</th>
+                              <th>Nombre</th>
+                              <th></th>
+                              <th className="text-center">Eliminar</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  ) : (
-                    <div className="w-100 mt-2">
-                      <span className="t3">No hay archivos almacenados</span>
-                    </div>
-                  )}
-                </div>
+                          </thead>
+                          <tbody>
+                            {archivos.map((file, index) => (
+                              <tr key={index}>
+                                <td>{index + 1}</td>
+                                <td>
+                                  <span className="t3 p-0">
+                                    {RecortarTexto(file.nombrearchivo, 20)}
+                                  </span>
+                                </td>
+                                <td>
+                                  <a
+                                    className="text-primary"
+                                    style={{
+                                      cursor: "pointer",
+                                      textDecoration: "underline",
+                                    }}
+                                    onClick={() => vistaPreviaImagen(file.ruta)}
+                                  >
+                                    Vista previa
+                                  </a>
+                                </td>
+                                <td>
+                                  <div className="w-100 d-flex">
+                                    <button
+                                      className="btn-danger-rifas m-auto rounded-1 t5 text-light"
+                                      onClick={() => {
+                                        eliminarArchivo(file.idimage);
+                                      }}
+                                    >
+                                      <FontAwesomeIcon icon={faTimes} />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : null}
+                  </div>
 
-                <div className="col-lg-12 col-md-12 col-sm-12 mt-3">
-                  <InputText
-                    disabled={false}
-                    placeHolder="Cantidad de Boletos"
-                    valor={cantidadBoletos}
-                    tipoValor="numero"
-                    onChange={(valor) => setCantidadBoletos(valor)}
-                  />
-                </div>
+                  <div className="col-lg-12 col-md-12 col-sm-12 mt-3">
+                    <InputText
+                      disabled={false}
+                      placeHolder="Cantidad de Boletos"
+                      valor={cantidadBoletos}
+                      tipoValor="numero"
+                      onChange={(valor) => setCantidadBoletos(valor)}
+                    />
+                  </div>
 
-                <div className="w-100 d-flex justify-content-center align-items-center mt-3">
-                  <button
-                    className="t3 btn-primary-rifas border rounded-2 p-2 text-light"
-                    disabled={false}
-                    onClick={() => {
-                      handleGuardarCambios();
-                    }}
-                  >
-                    <FontAwesomeIcon icon={faSave} className="me-1" />
-                    Guardar Cambios
-                  </button>
+                  <div className="w-100 d-flex justify-content-center align-items-center mt-3">
+                    <button
+                      className="t3 btn-primary-rifas border rounded-2 p-2 text-light"
+                      disabled={false}
+                      onClick={() => {
+                        handleGuardarCambios();
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faSave} className="me-1" />
+                      Guardar Cambios
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div>
-                <img src={rutaImagen} className="w-100" />
-              </div>
-            )}
-          </div>
+              ) : (
+                <div className="expand-animation w-100">
+                  <img src={rutaImagen} className="w-100 rounded-2" />
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="w-100 text-center">
+              <Spinner />
+            </div>
+          )}
         </Modal.Body>
         <Modal.Footer>
           <div className="w-100 d-flex justify-content-center align-items-center mt-3">

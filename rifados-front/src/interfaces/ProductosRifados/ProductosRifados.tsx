@@ -14,12 +14,6 @@ interface ColumnasI {
   header: string | number | boolean;
 }
 
-interface ImagenesI {
-  idimage: number;
-  ruta: string;
-  nombrearchivo: string;
-}
-
 interface FilasI {
   id: number;
   nombre: string;
@@ -28,7 +22,6 @@ interface FilasI {
   boletos: number;
   nombreUser: string;
   [key: string]: any; // Firma de índice añadida
-  imagenes: ImagenesI[];
 }
 
 interface ResponseI {
@@ -147,7 +140,7 @@ export default function ProductosRifados() {
     try {
       const response = await getData<ResponseI>("productosRegistrados", null);
       const { status, data } = response;
-      console.log(data);
+      //console.log(data);
       if (status === 200) {
         setFilas(data.productos);
       }
@@ -362,7 +355,7 @@ export default function ProductosRifados() {
       <h2>Productos Rifados</h2>
       <hr />
       {carga ? (
-        <div className="w-100">
+        <div className="w-100 expand-animation">
           <Tabla
             columnas={columnas}
             filas={filas}

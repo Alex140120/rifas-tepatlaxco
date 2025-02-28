@@ -71,30 +71,30 @@ export default function Rifas() {
     <>
       <div>
         {carga ? (
-          <div className="w-100 p-0 m-0 bg-dark expand-animation">
-            {imagenes.length
-              ? imagenes.map((file, index) => (
-                  <Carousel interval={2500} key={index}>
-                    <Carousel.Item>
-                      <div className="carousel-image-container">
-                        <img
-                          className="d-block img-product-carousel"
-                          src={file.ruta}
-                        />
-                        <div className="overlay" />
-                        <Carousel.Caption>
-                          <h1>{nombre}</h1>
-                          <div className="m-auto text-justify">
-                            <p className="text-light translucent-black">
-                              {descripcion}
-                            </p>
-                          </div>
-                        </Carousel.Caption>
-                      </div>
-                    </Carousel.Item>
-                  </Carousel>
-                ))
-              : null}
+          <div className="p-0 m-0 bg-light expand-animation m-auto">
+            {imagenes.length ? (
+              <Carousel interval={2500}>
+                {imagenes.map((item, index) => (
+                  <Carousel.Item key={index}>
+                    <div className="carousel-image-container">
+                      <img
+                        className="d-block img-product-carousel"
+                        src={item.ruta}
+                      />
+                      <div className="overlay" />
+                      <Carousel.Caption>
+                        <h1>{nombre}</h1>
+                        <div className="m-auto text-justify">
+                          <p className="text-light translucent-black t3">
+                            {descripcion}
+                          </p>
+                        </div>
+                      </Carousel.Caption>
+                    </div>
+                  </Carousel.Item>
+                ))}
+              </Carousel>
+            ) : null}
           </div>
         ) : (
           <div className="text-center w-100 pt-3 pb-2">

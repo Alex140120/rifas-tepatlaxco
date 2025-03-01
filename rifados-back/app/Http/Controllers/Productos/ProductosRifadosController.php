@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Productos;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Globales\AuthUserController;
+use App\Http\Controllers\Globales\SubirArchivoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -12,10 +13,12 @@ use function Laravel\Prompts\select;
 class ProductosRifadosController extends Controller
 {
     private $userAuth;
+    private $archivosController;
 
     public function __construct()
     {
         $this->userAuth = app(AuthUserController::class)->AuthUser();
+        $this->archivosController = new SubirArchivoController();
     }
 
     public function guardarNuevaRifa(Request $request)
@@ -234,6 +237,12 @@ class ProductosRifadosController extends Controller
 
         extract($paramsRequest);
 
+        $tamano_Permitido = 5242880;
+        $extensiones_permitidas = ["jpg", "png", "jpeg"];
+        $output = false;
+        $alerta = "";
+        $msj = "";
+
         try {
 
             $actualiza = DB::table('productos')
@@ -244,7 +253,78 @@ class ProductosRifadosController extends Controller
                     'boletos' => $cantidadBoletos
                 ]);
 
-            return response()->json(['output' => $actualiza], 200);
+            // Guadar los archivos del nuevo producto
+            if ($idProducto) {
+                if ($request->hasFile('archivos')) {
+
+                    # Recorre archivo por archivo
+                    foreach ($request->file('archivos') as $archivo) {
+
+                        $pref1 = substr(md5(uniqid(rand())), 0, 6);
+                        $separa = "_";
+
+                        $nombreArchivo = $archivo->getClientOriginalName(); # nombre del archivo;
+                        $nombreArchivoRuta = $pref1 . $separa . $nombreArchivo;
+
+                        $tamano_archivo = $archivo->getSize(); # tamaño del archivo
+
+                        $extension_archivo = strtolower($archivo->getClientOriginalExtension()); # extensión de archivo
+
+                        # Buscar la extension del archivo en el arreglo de las permitidas
+                        if (in_array($extension_archivo, $extensiones_permitidas)) {
+                            # verificar el tamaño
+                            if ($tamano_Permitido >= $tamano_archivo) {
+
+                                $carpeta = public_path("productos");
+                                # Produccion
+                                // $carpeta = base_path("../public_html/$nomFolder");
+
+                                # Si no existe la carpeta, crearla
+                                if (!file_exists($carpeta)) {
+                                    mkdir($carpeta, 0777, true);
+                                }
+
+                                # ==================== mover a la carpeta destino ==================
+                                # PARA LOCAL
+                                $archivo->move($carpeta, $nombreArchivoRuta);
+                                # PARA PRODUCCION
+                                //$archivo->move(base_path('../public_html/avisos'), $nombreArchivoRuta);
+
+                                $ruta = "../productos/$nombreArchivoRuta";
+
+                                DB::table('imagenesproductos')->insert(
+                                    [
+                                        'ruta'          => $ruta,
+                                        'nombrearchivo' => $nombreArchivoRuta,
+                                        'id_producto'   => $idProducto
+                                    ]
+                                );
+                                $output = true;
+                                $alerta = true;
+                                $msj = true;
+                            }
+                            # Fallo del tamaño
+                            else {
+                                $output = false;
+                                $alerta = 'error';
+                                $msj = 'El tamaño del archivo excede el límite permitido.';
+                            }
+                        }
+                        # Fallo de extensión
+                        else {
+                            $output = false;
+                            $alerta = 'error';
+                            $msj = 'El archivo seleccionado tiene una extensión inválida.';
+                        }
+                    }
+                }
+            }
+
+            return response()->json([
+                'output' => $output,
+                'alerta' => $alerta,
+                'msj'   => $msj
+            ], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }
@@ -253,14 +333,22 @@ class ProductosRifadosController extends Controller
     public function eliminarImagenProducto(Request $request)
     {
         $paramRequest = $request->validate([
-            'idimage' => 'required|int'
+            'idimage' => 'required|int',
+            'nombreArchivo' => 'required|string'
         ]);
 
-        $idimage = $paramRequest['idimage'];
+        extract($paramRequest);
 
         try {
 
-            DB::table('imagenesproductos')->where('id', $idimage)->delete();
+            DB::transaction(function () use ($idimage, $nombreArchivo) {
+                $eliminaImagen = DB::table('imagenesproductos')->where('id', $idimage)->delete();
+
+                if ($eliminaImagen) {
+                    // Borrar los archivos de la carpeta
+                    $this->archivosController->EliminarArchivo("productos", $nombreArchivo);
+                }
+            });
 
             return response()->json(['output' => true], 200);
         } catch (\Throwable $th) {

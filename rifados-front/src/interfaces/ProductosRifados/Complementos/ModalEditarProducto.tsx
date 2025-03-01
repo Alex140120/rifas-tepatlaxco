@@ -4,6 +4,7 @@ import TextArea from "../../../components/Tags/TextArea";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowAltCircleLeft,
+  faFolderOpen,
   faSave,
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
@@ -14,6 +15,7 @@ import {
 } from "../../../components/Alertas/Alertas";
 import { getData, postData } from "../../../api/apiRequest";
 import Spinner from "../../../components/Tags/Spinner";
+import Swal from "sweetalert2";
 
 interface ImagenesI {
   idimage: number;
@@ -58,9 +60,12 @@ export default function ModalEditarProducto({
 
   const [rutaImagen, setRutaImagen] = useState<string>("");
 
+  const [arrayNombreArchivos, setArrayNombreArchivos] = useState<string[]>([]);
+  const [arrayArchivos, setArrayArchivos] = useState<File[]>([]);
+
   useEffect(() => {
     if (show) {
-      console.log(productoSeleccionado);
+      //console.log(productoSeleccionado);
       if (productoSeleccionado) {
         extraerArchivos(productoSeleccionado.id);
         setNombreProducto(productoSeleccionado.nombre);
@@ -74,6 +79,8 @@ export default function ModalEditarProducto({
       setCantidadBoletos("");
       setRutaImagen("");
       setArchivos([]);
+      setArrayArchivos([]);
+      setArrayNombreArchivos([]);
     }
   }, [show]);
 
@@ -103,45 +110,12 @@ export default function ModalEditarProducto({
     }
   };
 
-  const handleGuardarCambios = async () => {
-    const datos = {
-      idProducto: productoSeleccionado?.id,
-      nombreProducto,
-      descripcionProducto,
-      cantidadBoletos,
-    };
-    console.log(datos);
+  const eliminarImagenDB = async (idimage: number, nombreArchivo: string) => {
     try {
-      const response = await postData("modificarProducto", datos);
-      const { status } = response;
-      if (status === 200) {
-        actualizar(true);
-        notifySuccess("Producto modificado.", "top-center");
-        setTimeout(() => {
-          handleClose();
-        }, 350);
-      }
-    } catch (error: any) {
-      if (error.response) {
-        notifyError(
-          "No se pudo modificar, inténtalo nuevamente.",
-          "top-center"
-        );
-        // obtener el status y los datos de la respuesta
-        const { status, data } = error.response;
-        console.log(
-          `status: ${status} | error: ${data.error} | message: ${data.message}`
-        );
-      } else {
-        // Si no hay `response` (error de red u otro problema)
-        console.log("Error de red o configuración:", error.message);
-      }
-    }
-  };
-
-  const eliminarArchivo = async (idimage: number) => {
-    try {
-      const response = await postData("eliminarImagenProducto", { idimage });
+      const response = await postData("eliminarImagenProducto", {
+        idimage,
+        nombreArchivo,
+      });
       const { status, data } = response;
       if (status === 200) {
         const nuevosArchivos = archivos.filter(
@@ -176,8 +150,171 @@ export default function ModalEditarProducto({
   };
 
   const vistaPreviaImagen = (ruta: string) => {
-    console.log(ruta);
     setRutaImagen(ruta);
+  };
+
+  // Selección de archivos (agregar nombre, agregar archivos)
+  const handleSelecionarArchivos = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    // Convertir el FileList a un array y extraer los nombres de los archivos
+    const archivosSeleccionados: FileList | null = e.target.files;
+    if (!archivosSeleccionados) return;
+
+    for (let i = 0; i < archivosSeleccionados.length; i++) {
+      // Archivo por archivo
+      const archivo = archivosSeleccionados[i];
+      // Verifica la extenxión del archivo
+      const extensionValida = validarExtension(archivo.name);
+      // Verifica el tamañan
+      const tamanoValido = validarTamano(archivo);
+
+      // Verifica si contiene extensión válida
+      if (extensionValida) {
+        // Verifica el tamaño del archivo seleccionado
+        if (tamanoValido) {
+          // Agregar unicamente los nombres de los archivos
+          const nombresArchivos = Array.from(archivosSeleccionados).map(
+            (file) => file.name
+          );
+          // Agrega el archivo en general
+          const archivos = Array.from(archivosSeleccionados).map(
+            (file) => file
+          );
+
+          // Si hay más de 1 agrega uno por uno
+          if (nombresArchivos.length > 1) {
+            // Ingresa los nombre de los archivos al arreglo correspondiente
+            setArrayNombreArchivos([
+              ...arrayNombreArchivos,
+              ...nombresArchivos,
+            ]);
+
+            // Agregra los archivo al arreglo correspondiente
+            setArrayArchivos([...arrayArchivos, ...archivos]);
+          } else {
+            // Agrega el nombre del único archivo
+            setArrayNombreArchivos([
+              ...arrayNombreArchivos,
+              nombresArchivos[0],
+            ]);
+
+            // Agrega el único archivo
+            setArrayArchivos([...arrayArchivos, archivos[0]]);
+          }
+        }
+        // Fallo de tamaño excedido
+        else {
+          Swal.fire({
+            title: "¡Error!",
+            html: `Lo sentimos, el archivo ${archivo.name} es demasiado grande. <br/><br/>Tamaño máximo admitido: 5 MB `,
+            icon: "error",
+            showConfirmButton: true,
+          });
+        }
+      }
+      // incompatibilidade de extensión
+      else {
+        Swal.fire({
+          title: "¡Error!",
+          html: `El archivo seleccionado tiene una extensión inválida [${archivo.name}]. <br/><br/> Las extensiones válidas son: <br/> <strong> .jpg, .png, .jpeg, .pdf, .xls, .doc, .ppt, .txt, .zip, .xlsx, .docx, .pptx, .xps, .odt, .dotx, .pptm </strong>`,
+          icon: "error",
+          showConfirmButton: true,
+        });
+      }
+    }
+  };
+
+  // Función para validar la extensión de los archivos
+  const validarExtension = (nombreArchivo: string) => {
+    // Define las extensiones permitidas en un array
+    const extensionesPermitidas = [
+      ".jpg",
+      ".png",
+      ".jpeg",
+      ".pdf",
+      ".xls",
+      ".doc",
+      ".ppt",
+      ".txt",
+      ".zip",
+      ".xlsx",
+      ".docx",
+      ".pptx",
+      ".xps",
+      ".odt",
+      ".dotx",
+      ".pptm",
+    ];
+    // Obtiene la extensión del archivo (lo que está después del último punto)
+    const extension = nombreArchivo.substring(nombreArchivo.lastIndexOf("."));
+
+    // Verifica si la extensión está en el array de extensiones permitidas
+    return extensionesPermitidas.includes(extension.toLowerCase());
+  };
+
+  // Función para validar el tamaño de los archivos (en bytes)
+  const validarTamano = (file: any) => {
+    const tamañoLimite = 5242880; // 5 MB en bytes
+    return file.size <= tamañoLimite;
+  };
+
+  // Eliminar archivos del arreglo
+  const eliminarArchivo = (index: number) => {
+    // Crea una copia del arreglo actual
+    const arrayActualizado = [...arrayNombreArchivos];
+    const arrayArchivosActualizado = [...arrayArchivos];
+
+    // Elimina el registro en el índice proporcionado
+    arrayActualizado.splice(index, 1);
+    arrayArchivosActualizado.splice(index, 1);
+
+    // Actualiza el estado con el nuevo arreglo
+    setArrayNombreArchivos(arrayActualizado);
+    setArrayArchivos(arrayArchivosActualizado);
+  };
+
+  const handleGuardarCambios = async () => {
+    const formData = new FormData();
+
+    const idProducto = productoSeleccionado?.id;
+
+    if (idProducto !== undefined) {
+      formData.append("idProducto", idProducto.toString());
+      formData.append("nombreProducto", nombreProducto);
+      formData.append("descripcionProducto", descripcionProducto);
+      formData.append("cantidadBoletos", cantidadBoletos);
+      for (let i = 0; i < arrayArchivos.length; i++) {
+        formData.append("archivos[]", arrayArchivos[i]);
+      }
+
+      try {
+        const response = await postData("modificarProducto", formData);
+        const { status } = response;
+        if (status === 200) {
+          actualizar(true);
+          notifySuccess("Producto modificado.", "top-center");
+          setTimeout(() => {
+            handleClose();
+          }, 350);
+        }
+      } catch (error: any) {
+        if (error.response) {
+          notifyError(
+            "No se pudo modificar, inténtalo nuevamente.",
+            "top-center"
+          );
+          // obtener el status y los datos de la respuesta
+          const { status, data } = error.response;
+          console.log(
+            `status: ${status} | error: ${data.error} | message: ${data.message}`
+          );
+        } else {
+          // Si no hay `response` (error de red u otro problema)
+          console.log("Error de red o configuración:", error.message);
+        }
+      }
+    }
   };
 
   return (
@@ -218,15 +355,45 @@ export default function ModalEditarProducto({
                   </div>
 
                   <div className="col-lg-12 col-md-12 col-sm-12 mt-3">
+                    <div>
+                      <label
+                        className="text-grey w-100 text-center button-add-files rounded-top-2 mt-2"
+                        htmlFor="src-file1"
+                        style={{ cursor: "pointer" }}
+                      >
+                        <FontAwesomeIcon
+                          icon={faFolderOpen}
+                          className="me-2 t3"
+                        />
+                        <span className="t3">Agregar Imágenes</span>
+                      </label>
+                      <input
+                        type="file"
+                        name="src-file1"
+                        id="src-file1"
+                        multiple
+                        disabled={false}
+                        className="d-none"
+                        aria-label="Archivo"
+                        accept={".jpg, .png, .jpeg"}
+                        onChange={handleSelecionarArchivos}
+                      />
+                    </div>
+
                     {archivos.length > 0 ? (
                       <div className="mt-0">
                         <table className="t3 files-table">
                           <thead>
                             <tr>
-                              <th>No.</th>
-                              <th>Nombre</th>
-                              <th></th>
-                              <th className="text-center">Eliminar</th>
+                              <th style={{ width: "10%" }}>No.</th>
+                              <th style={{ width: "50%" }}>Nombre</th>
+                              <th style={{ width: "25%" }}></th>
+                              <th
+                                style={{ width: "15%" }}
+                                className="text-center"
+                              >
+                                Eliminar
+                              </th>
                             </tr>
                           </thead>
                           <tbody>
@@ -245,7 +412,9 @@ export default function ModalEditarProducto({
                                       cursor: "pointer",
                                       textDecoration: "underline",
                                     }}
-                                    onClick={() => vistaPreviaImagen(file.ruta)}
+                                    onClick={() => {
+                                      vistaPreviaImagen(file.ruta);
+                                    }}
                                   >
                                     Vista previa
                                   </a>
@@ -255,7 +424,10 @@ export default function ModalEditarProducto({
                                     <button
                                       className="btn-danger-rifas m-auto rounded-1 t5 text-light"
                                       onClick={() => {
-                                        eliminarArchivo(file.idimage);
+                                        eliminarImagenDB(
+                                          file.idimage,
+                                          file.nombrearchivo
+                                        );
                                       }}
                                     >
                                       <FontAwesomeIcon icon={faTimes} />
@@ -267,6 +439,40 @@ export default function ModalEditarProducto({
                           </tbody>
                         </table>
                       </div>
+                    ) : null}
+                    {arrayNombreArchivos.length > 0 ? (
+                      <>
+                        <div className="w-100 mt-3 mb-2 text-center border-top p-1">
+                          <span>Nuevo Archivos</span>
+                        </div>
+                        <div className="mt-0">
+                          <table className="t3 files-table">
+                            <tbody>
+                              {arrayNombreArchivos.map((file, index) => (
+                                <tr key={index}>
+                                  <td style={{ width: "10%" }}>
+                                    {index + (archivos.length + 1)}
+                                  </td>
+                                  <td style={{ width: "50%" }}>{file}</td>
+                                  <td style={{ width: "25%" }}></td>
+                                  <td style={{ width: "15%" }}>
+                                    <div className="w-100 d-flex">
+                                      <button
+                                        className="btn-danger-rifas m-auto rounded-1 t5"
+                                        onClick={() => {
+                                          eliminarArchivo(index);
+                                        }}
+                                      >
+                                        <FontAwesomeIcon icon={faTimes} />
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </>
                     ) : null}
                   </div>
 

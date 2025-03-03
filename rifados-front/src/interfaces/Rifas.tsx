@@ -41,8 +41,8 @@ export default function Rifas() {
         null
       );
       const { status, data } = response;
-      console.log(status);
-      console.log(data);
+      //console.log(status);
+      //console.log(data);
       if (status === 204) {
       }
       if (status === 200) {
@@ -94,6 +94,14 @@ export default function Rifas() {
                   </Carousel.Item>
                 ))}
               </Carousel>
+            ) : null}
+            {!idProducto ? (
+              <div
+                className="w-100 mt-5 mb-3 text-center epxand-animation"
+                style={{ background: "#eee" }}
+              >
+                <h5>No hay rifas por el momento.</h5>
+              </div>
             ) : null}
           </div>
         ) : (

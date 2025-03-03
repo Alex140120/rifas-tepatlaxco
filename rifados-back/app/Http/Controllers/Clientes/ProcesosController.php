@@ -55,4 +55,28 @@ class ProcesosController extends Controller
             return response()->json(['error' => $th->getMessage()], 500);
         }
     }
+
+    public function extraerBoletosRifaActiva()
+    {
+        // Extraer el producto en rifa
+        try {
+
+            $producto = DB::table('productos')
+                ->where('en_rifa', 1)
+                ->select(
+                    'id',
+                    'rangoInicial',
+                    'rangoFinal'
+                )
+                ->first();
+
+            if (!$producto) {
+                return response()->json(['message' => "Aún no hay producto en rifa."], 204);
+            }
+
+            return response()->json(['producto' => $producto], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
 }

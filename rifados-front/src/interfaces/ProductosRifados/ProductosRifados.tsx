@@ -19,7 +19,8 @@ interface FilasI {
   nombre: string;
   descripcion: string;
   status: number;
-  boletos: number;
+  rangoInicial: number;
+  rangoFinal: number;
   nombreUser: string;
   [key: string]: any; // Firma de índice añadida
 }
@@ -34,7 +35,8 @@ export default function ProductosRifados() {
   const columnas: ColumnasI[] = [
     { field: "nombre", header: "Producto" },
     { field: "statusRifa", header: "En Rifa" },
-    { field: "boletos", header: "Total Boletos" },
+    { field: "rangoInicial", header: "Rango Inicial Boletos" },
+    { field: "rangoFinal", header: "Rango Final Boletos" },
     { field: "nombreUser", header: "Subido por" },
     { field: "acciones", header: "" },
   ];

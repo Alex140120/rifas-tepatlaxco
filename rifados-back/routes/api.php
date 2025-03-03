@@ -33,6 +33,7 @@ Route::controller(AreasGeograficasController::class)->group(function () {
 Route::controller(ProcesosController::class)->group(function () {
     Route::post('/subirArchivo', 'subir_archivo');
     Route::get('/extraerProductoRifado', 'extraerProductoRifado');
+    Route::get('/extraerBoletosRifaActiva', 'extraerBoletosRifaActiva');
 });
 
 Route::middleware('auth:sanctum')->group(function () {

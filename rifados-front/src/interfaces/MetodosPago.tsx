@@ -30,7 +30,7 @@ export default function MetodosPago() {
       <div className="w-100 mt-4 pb-5 px-2">
         {cuentasBancarias.length
           ? cuentasBancarias.map((cuenta, index) => (
-              <div key={index} className="row m-0 rounded-3 p-2 datos-banco mb-3 py-2">
+              <div key={index} className="row m-0 rounded-3 p-2 datos-banco mb-3 py-2 expand-animation">
                 <div className="col-lg-2 col-md-12 col-xs-12 border-end d-flex align-items-center justify-content-center">
                   <img src={cuenta.logo_banco} className="img-carusel rounded-2" />
                 </div>

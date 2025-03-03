@@ -93,7 +93,7 @@ export default function MetodoPago({ show, handleClose, tipoBanco }: Props) {
                 cuentasBancarias.map((cuenta, index) => (
                   <div
                     key={index}
-                    className="w-100 bg-light rounded-3 p-2 datos-banco mb-3"
+                    className="w-100 bg-light rounded-3 p-2 datos-banco mb-3 expand-animation"
                   >
                     <div className="d-flex mb-1" style={{ fontSize: "15px" }}>
                       <p className="m-0 w-25">Nombre:</p>

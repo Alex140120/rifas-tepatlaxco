@@ -16,6 +16,7 @@ import {
 import { getData, postData } from "../../../api/apiRequest";
 import Spinner from "../../../components/Tags/Spinner";
 import Swal from "sweetalert2";
+import Alerta from "../../../components/Alertas/Alerta";
 
 interface ImagenesI {
   idimage: number;
@@ -28,7 +29,8 @@ interface FilasI {
   nombre: string;
   descripcion: string;
   status: number;
-  boletos: number;
+  rangoInicial: number;
+  rangoFinal: number;
   nombreUser: string;
   [key: string]: any; // Firma de índice añadida
 }
@@ -56,12 +58,18 @@ export default function ModalEditarProducto({
 
   const [descripcionProducto, setDescripcionProducto] = useState<string>("");
   const [archivos, setArchivos] = useState<ImagenesI[]>([]);
-  const [cantidadBoletos, setCantidadBoletos] = useState<string>("");
+
+  const [rangoInicialBoletos, setRangoInicialBoletos] = useState<number>(0);
+  const [rangoFinalBoletos, setRangoFinalBoletos] = useState<number>(0);
 
   const [rutaImagen, setRutaImagen] = useState<string>("");
 
   const [arrayNombreArchivos, setArrayNombreArchivos] = useState<string[]>([]);
   const [arrayArchivos, setArrayArchivos] = useState<File[]>([]);
+
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [showAlert2, setShowAlert2] = useState<boolean>(false);
+  const [disabledBtnGuardar, setDisabledBtnGuardar] = useState<boolean>(false);
 
   useEffect(() => {
     if (show) {
@@ -70,17 +78,23 @@ export default function ModalEditarProducto({
         extraerArchivos(productoSeleccionado.id);
         setNombreProducto(productoSeleccionado.nombre);
         setDescripcionProducto(productoSeleccionado.descripcion);
-        setCantidadBoletos(productoSeleccionado.boletos.toString());
+        setRangoInicialBoletos(productoSeleccionado.rangoInicial);
+        setRangoFinalBoletos(productoSeleccionado.rangoFinal);
       }
     } else {
       setCarga(false);
       setNombreProducto("");
       setDescripcionProducto("");
-      setCantidadBoletos("");
       setRutaImagen("");
       setArchivos([]);
       setArrayArchivos([]);
       setArrayNombreArchivos([]);
+      setRangoInicialBoletos(0);
+      setRangoFinalBoletos(0);
+      setDisabledBtnGuardar(false);
+
+      setShowAlert(false);
+      setShowAlert2(false);
     }
   }, [show]);
 
@@ -283,7 +297,9 @@ export default function ModalEditarProducto({
       formData.append("idProducto", idProducto.toString());
       formData.append("nombreProducto", nombreProducto);
       formData.append("descripcionProducto", descripcionProducto);
-      formData.append("cantidadBoletos", cantidadBoletos);
+      formData.append("rangoInicial", rangoInicialBoletos.toString());
+      formData.append("rangoFinal", rangoFinalBoletos.toString());
+
       for (let i = 0; i < arrayArchivos.length; i++) {
         formData.append("archivos[]", arrayArchivos[i]);
       }
@@ -336,22 +352,105 @@ export default function ModalEditarProducto({
             <div className="w-100 expand-animation">
               {rutaImagen === "" ? (
                 <div>
+                  {showAlert ? (
+                    <div className="w-100 mb-3">
+                      <Alerta
+                        header="¡Atención!"
+                        body="Es obligatorio llenar todos los campos."
+                        clases="alerta-danger expand-animation"
+                      />
+                    </div>
+                  ) : null}
+
+                  {showAlert2 ? (
+                    <div className="w-100 mb-3">
+                      <Alerta
+                        header="¡Atención!"
+                        body="El rango final debe ser mayor al rango inicial."
+                        clases="alerta-danger expand-animation"
+                      />
+                    </div>
+                  ) : null}
+
                   <div className="w-100">
                     <InputText
                       disabled={false}
                       placeHolder="Nombre del Producto"
                       valor={nombreProducto}
                       tipoValor="texto"
-                      onChange={(e) => setNombreProducto(e)}
+                      onChange={(e) => {
+                        setNombreProducto(e);
+                        setDisabledBtnGuardar(!e ? true : false);
+                        setShowAlert(!e ? true : false);
+                      }}
                     />
                   </div>
+
                   <div className="col-lg-12 col-md-12 col-sm-12 mt-3">
                     <TextArea
                       disabled={false}
                       placeHolder="Descripción del producto"
                       valor={descripcionProducto}
-                      onChange={(e) => setDescripcionProducto(e.target.value)}
+                      onChange={(e) => {
+                        setDescripcionProducto(e.target.value);
+                        setDisabledBtnGuardar(!e.target.value ? true : false);
+                        setShowAlert(!e.target.value ? true : false);
+                      }}
                     />
+                  </div>
+
+                  <div className="col-lg-12 col-md-12 col-sm-12 mt-3">
+                    <div className="row">
+                      <div className="col-lg-6 col-md-6 col-xs-12">
+                        <div className="t4 mb-2">Rango incial boletos: </div>
+                        <InputText
+                          disabled={false}
+                          placeHolder="Rango inicial"
+                          valor={rangoInicialBoletos}
+                          tipoValor="numero"
+                          onChange={(valor) => {
+                            setRangoInicialBoletos(valor);
+                            setDisabledBtnGuardar(!valor ? true : false);
+                            setShowAlert(!valor ? true : false);
+                            setShowAlert2(
+                              parseInt(valor) > rangoFinalBoletos
+                                ? true
+                                : false
+                            );
+                            setDisabledBtnGuardar(
+                              parseInt(valor) > rangoFinalBoletos
+                                ? true
+                                : false
+                            );
+                          }}
+                        />
+                      </div>
+
+                      <div className="col-lg-6 col-md-6 col-xs-12">
+                      <div className="t4 mb-2">Rango final boletos: </div>
+                        <InputText
+                          disabled={false}
+                          placeHolder="Rango final"
+                          valor={rangoFinalBoletos}
+                          tipoValor="numero"
+                          onChange={(valor) => {
+                            setRangoFinalBoletos(valor);
+                            setDisabledBtnGuardar(!valor ? true : false);
+                            setShowAlert(!valor ? true : false);
+                            setShowAlert2(
+                              parseInt(valor) < rangoInicialBoletos
+                                ? true
+                                : false
+                            );
+                            setDisabledBtnGuardar(
+                              parseInt(valor) < rangoInicialBoletos
+                                ? true
+                                : false
+                            );
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <div className="col-lg-12 col-md-12 col-sm-12 mt-3">
@@ -476,20 +575,10 @@ export default function ModalEditarProducto({
                     ) : null}
                   </div>
 
-                  <div className="col-lg-12 col-md-12 col-sm-12 mt-3">
-                    <InputText
-                      disabled={false}
-                      placeHolder="Cantidad de Boletos"
-                      valor={cantidadBoletos}
-                      tipoValor="numero"
-                      onChange={(valor) => setCantidadBoletos(valor)}
-                    />
-                  </div>
-
                   <div className="w-100 d-flex justify-content-center align-items-center mt-3">
                     <button
                       className="t3 btn-primary-rifas border rounded-2 p-2 text-light"
-                      disabled={false}
+                      disabled={disabledBtnGuardar}
                       onClick={() => {
                         handleGuardarCambios();
                       }}

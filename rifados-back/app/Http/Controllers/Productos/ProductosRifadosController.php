@@ -142,7 +142,9 @@ class ProductosRifadosController extends Controller
                     'ta.descripcion',
                     'ta.boletos',
                     'ta.en_rifa AS status',
-                    DB::raw("CONCAT(tb.nombres, ' ', tb.apellido_p, ' ', tb.apellido_m) as nombreUser")
+                    DB::raw("CONCAT(tb.nombres, ' ', tb.apellido_p, ' ', tb.apellido_m) as nombreUser"),
+                    'rangoInicial',
+                    'rangoFinal'
                 )
                 ->orderBy('id', 'DESC')
                 ->get();
@@ -232,7 +234,8 @@ class ProductosRifadosController extends Controller
             'idProducto' => 'required|int',
             'nombreProducto' => 'required|string',
             'descripcionProducto' => 'required|string',
-            'cantidadBoletos' => 'required|int',
+            'rangoInicial' => 'required|int',
+            'rangoFinal' => 'required|int',
         ]);
 
         extract($paramsRequest);
@@ -250,7 +253,8 @@ class ProductosRifadosController extends Controller
                 ->update([
                     'nombre' => $nombreProducto,
                     'descripcion' => $descripcionProducto,
-                    'boletos' => $cantidadBoletos
+                    'rangoInicial' => $rangoInicial,
+                    'rangoFinal' => $rangoFinal
                 ]);
 
             // Guadar los archivos del nuevo producto

@@ -140,7 +140,6 @@ class ProductosRifadosController extends Controller
                     'ta.id',
                     'ta.nombre',
                     'ta.descripcion',
-                    'ta.boletos',
                     'ta.en_rifa AS status',
                     DB::raw("CONCAT(tb.nombres, ' ', tb.apellido_p, ' ', tb.apellido_m) as nombreUser"),
                     'rangoInicial',

@@ -69,4 +69,24 @@ class AdministradoresController extends Controller
             'usuario' => $nombres,
         ], 200);
     }
+
+    public function bancosRegistrados()
+    {
+        try {
+
+            $bancos = DB::table('bancos AS ta')
+                ->select(
+                    'ta.id',
+                    'ta.nombre_banco',
+                    'ta.logo_banco',
+                    DB::raw("(SELECT COUNT(*) FROM cuentas_bancarias cb  WHERE cb.banco = ta.id ) AS cuentas")
+                )
+                ->orderBy('ta.nombre_banco', 'ASC')
+                ->get();
+
+            return response()->json(['bancos' => $bancos], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
 }

@@ -29,7 +29,8 @@ class ProcesosController extends Controller
                     'id',
                     'nombre',
                     'descripcion',
-                    'boletos'
+                    'rangoInicial',
+                    'rangoFinal'
                 )
                 ->first();
 

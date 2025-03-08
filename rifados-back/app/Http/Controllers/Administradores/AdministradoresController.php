@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Administradores;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Globales\AuthUserController;
+use App\Http\Controllers\Globales\SubirArchivoController;
 use App\Models\usuarios;
 use Exception;
 use Illuminate\Http\Request;
@@ -12,10 +13,12 @@ use Illuminate\Support\Facades\DB;
 class AdministradoresController extends Controller
 {
     private $userAuth;
+    private $subirArchivo;
 
     public function __construct()
     {
         $this->userAuth = app(AuthUserController::class)->AuthUser();
+        $this->subirArchivo = new SubirArchivoController();
     }
 
     public function logueoAdministradores(Request $request)
@@ -85,6 +88,33 @@ class AdministradoresController extends Controller
                 ->get();
 
             return response()->json(['bancos' => $bancos], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function guardarNuevoBanco(Request $request)
+    {
+        $nombreBanco = $request->nombreBanco;
+
+        try {
+
+            $carpeta = "bancos";
+            $archivo = $this->subirArchivo->SubirArchivo($request, $carpeta, true);
+
+            if ($archivo[0] == 1) {
+                $nombreArchivo = $archivo[1];
+
+                $ruta = "../$carpeta/$nombreArchivo";
+
+                DB::table('bancos')->insert([
+                    'nombre_banco' => $nombreBanco,
+                    'logo_banco' => $ruta
+                ]);
+            }
+
+            return response()->json(['output' => $archivo], 200);
+
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }

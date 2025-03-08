@@ -26,13 +26,15 @@ class ProductosRifadosController extends Controller
         $params = $request->validate([
             'nombreProducto'        => 'required|string',
             'descripcionProducto'   => 'required|string',
-            'cantidadBoletos'       => 'required|int',
+            'rangoInicial'          => 'required|int',
+            'rangoFinal'            => 'required|int',
             'archivos'              => 'required'
         ]);
 
         $nombreProducto = $params['nombreProducto'];
         $descripcionProducto = $params['descripcionProducto'];
-        $cantidadBoletos = $params['cantidadBoletos'];
+        $rangoInicial = $params['rangoInicial'];
+        $rangoFinal = $params['rangoFinal'];
 
         $id_usuario = $this->userAuth->id;
         $status_enRifa = 0;
@@ -47,7 +49,8 @@ class ProductosRifadosController extends Controller
                     'descripcion'   => $descripcionProducto,
                     'id_usuario'    => $id_usuario,
                     'en_rifa'       => $status_enRifa,
-                    'boletos'       => $cantidadBoletos
+                    'rangoInicial'  => $rangoInicial,
+                    'rangoFinal'    => $rangoFinal
                 ]
             );
 

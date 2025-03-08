@@ -18,6 +18,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::controller(AdministradoresController::class)->group(function () {
         Route::get('/informacion', 'informacionLogueo');
         Route::get('/bancosRegistrados', 'bancosRegistrados');
+        Route::post('/guardarNuevoBanco', 'guardarNuevoBanco');
     });
 });
 

@@ -19,6 +19,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/informacion', 'informacionLogueo');
         Route::get('/bancosRegistrados', 'bancosRegistrados');
         Route::post('/guardarNuevoBanco', 'guardarNuevoBanco');
+        Route::post('/actualizarBanco', 'actualizarBanco');
+        Route::post('/eliminarBanco', 'eliminarBanco');
     });
 });
 

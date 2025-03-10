@@ -9,6 +9,7 @@ use App\Models\usuarios;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class AdministradoresController extends Controller
 {
@@ -114,7 +115,75 @@ class AdministradoresController extends Controller
             }
 
             return response()->json(['output' => $archivo], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
 
+    public function actualizarBanco(Request $request)
+    {
+        $nombreBanco = $request->nombreBanco;
+        $idBanco = $request->idBanco;
+        $logo = $request->logo;
+
+        // nombre de la carpeta de los bancos
+        $carpeta = "bancos";
+        // obtener el nombre del archivo del logo
+        $nombreLogo = Str::afterLast($logo, '/');
+
+        try {
+
+            $archivo = $this->subirArchivo->SubirArchivo($request, $carpeta, true);
+
+            if ($archivo[0] == 1) {
+
+                // Aplicar las modificaciones
+                $nombreArchivo = $archivo[1];
+
+                $ruta = "../$carpeta/$nombreArchivo";
+
+                DB::table('bancos')
+                    ->where('id', $idBanco)
+                    ->update([
+                        'nombre_banco' => $nombreBanco,
+                        'logo_banco' => $ruta
+                    ]);
+
+                // Si subio correctamente la imagen, se elimina la imagen anterior
+                $this->subirArchivo->EliminarArchivo($carpeta, $nombreLogo);
+            }
+
+            return response()->json(['output' => $archivo], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function eliminarBanco(Request $request)
+    {
+        $params = $request->validate([
+            'idBanco' => 'required|int',
+            'logo' => 'required|string'
+        ]);
+
+        try {
+
+            DB::transaction(function () use ($params) {
+                extract($params);
+
+                // nombre de la carpeta de los bancos
+                $carpeta = "bancos";
+                // obtener el nombre del archivo del logo
+                $nombreLogo = Str::afterLast($logo, '/');
+
+                // Eliminar bancos de la base de datos
+                DB::table('bancos')->where('id', $idBanco)->delete();
+
+                // Eliminar el logo del banco
+                $this->subirArchivo->EliminarArchivo($carpeta, $nombreLogo);
+            });
+
+            return response()->json(['output' => true], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }

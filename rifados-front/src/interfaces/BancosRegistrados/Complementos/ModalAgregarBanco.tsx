@@ -14,13 +14,30 @@ import {
   notifySuccess,
 } from "../../../components/Alertas/Alertas";
 
+interface BancoI {
+  id: number;
+  nombre_banco: string;
+  logo_banco: string;
+}
+
 interface Props {
   show: boolean;
   handleClose: () => void;
   actualizarBancos: (valor: boolean) => void;
+
+  tipoTransaccion: string;
+  datosProps: BancoI | null;
 }
 
-export default function ModalAgregarBanco({ show, handleClose, actualizarBancos }: Props) {
+export default function ModalAgregarBanco({
+  show,
+  handleClose,
+  actualizarBancos,
+  tipoTransaccion,
+  datosProps,
+}: Props) {
+  const [tituloModal, setTituloModal] = useState<string>("");
+
   const [nombreBanco, setNombreBanco] = useState<string>("");
 
   const [disBtnAddFiles, setDisBtnAddFiles] = useState<boolean>(true);
@@ -115,7 +132,14 @@ export default function ModalAgregarBanco({ show, handleClose, actualizarBancos 
 
   // Inicial
   useEffect(() => {
-    if (!show) {
+    if (show) {
+      if (tipoTransaccion === "new") {
+        setTituloModal("Agregar");
+      } else if (tipoTransaccion === "update" && datosProps !== null) {
+        setTituloModal("Modificar");
+        setNombreBanco(datosProps?.nombre_banco);
+      }
+    } else {
       setNombreBanco("");
     }
   }, [show]);
@@ -144,11 +168,19 @@ export default function ModalAgregarBanco({ show, handleClose, actualizarBancos 
     if (archivo !== null) {
       const formData = new FormData();
 
+      if (datosProps !== null) {
+        formData.append("idBanco", datosProps.id.toString());
+        formData.append("logo", datosProps.logo_banco);
+      }
       formData.append("nombreBanco", nombreBanco);
       formData.append("archivo", archivo);
 
+      const endPoint =
+        tipoTransaccion === "new" ? "guardarNuevoBanco" : "actualizarBanco";
+      const mensaje = tipoTransaccion === "new" ? "guardado" : "modificado";
+
       try {
-        const response = await postData("guardarNuevoBanco", formData);
+        const response = await postData(endPoint, formData);
 
         const { status } = response;
 
@@ -156,7 +188,7 @@ export default function ModalAgregarBanco({ show, handleClose, actualizarBancos 
 
         if (status === 200) {
           notifySuccess(
-            "El producto se ha guardado exitosamente.",
+            `El producto se ha ${mensaje} exitosamente.`,
             "top-center"
           );
           setNombreBanco("");
@@ -174,7 +206,7 @@ export default function ModalAgregarBanco({ show, handleClose, actualizarBancos 
           const { status, data } = error.response;
           console.log(`status: ${status} | error: `, data.error);
 
-          notifyError("Hubo un error al guardar el producto.", "top-center");
+          notifyError("Hubo un error. Intente más tarde.", "top-center");
         } else {
           // Si no hay `response` (error de red u otro problema)
           console.log("Error de red o configuración:", error.message);
@@ -198,7 +230,7 @@ export default function ModalAgregarBanco({ show, handleClose, actualizarBancos 
       >
         <Modal.Header closeButton>
           <Modal.Title id="contained-modal-title-vcenter">
-            <span className="text-grey">Agregar Banco</span>
+            <span className="text-grey">{tituloModal} Banco</span>
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>

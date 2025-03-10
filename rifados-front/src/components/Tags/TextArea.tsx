@@ -19,7 +19,7 @@ export default function TextArea({
         disabled={disabled}
         placeholder={placeHolder}
         value={valor}
-        className="w-100 border rounded-1 outline-none t2 text-grey p-2 bg-light"
+        className="w-100 border rounded-1 outline-none t3 text-grey p-2 bg-light"
         style={{ height: "120px" }}
         onChange={onChange}
         onBlur={onBlur}

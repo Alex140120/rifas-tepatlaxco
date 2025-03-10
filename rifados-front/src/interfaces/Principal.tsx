@@ -13,29 +13,25 @@ export default function Principal() {
   useEffect(() => {
     switch (modulo) {
       case "usuarios":
-        setComponente(<Usuarios/>);
+        setComponente(<Usuarios />);
         break;
       case "nuevaRifa":
-        setComponente(<NuevaRifa/>);
+        setComponente(<NuevaRifa />);
         break;
 
       case "productosRifados":
-        setComponente(<ProductosRifados/>);
+        setComponente(<ProductosRifados />);
         break;
 
       case "bancosRegistrados":
-        setComponente(<BancosRegistrados/>);
+        setComponente(<BancosRegistrados />);
         break;
 
       default:
-        setComponente(<HomeSistema/>);
+        setComponente(<HomeSistema />);
         break;
     }
   }, [modulo]);
 
-  return (
-    <div>
-      <h1>{componente}</h1>
-    </div>
-  );
+  return <div>{componente}</div>;
 }

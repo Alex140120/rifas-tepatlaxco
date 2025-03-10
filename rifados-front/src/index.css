@@ -574,7 +574,7 @@ textarea {
 .files-table tbody td {
   border-bottom: 1px solid #ddd;
   padding: 5px 10px;
-  font-size: 15px;
+  font-size: 12px;
 }
 
 .button-delete-file {
@@ -596,7 +596,93 @@ textarea {
   box-shadow: 0 0 5px 5px #e0e0e0;
 }
 
-@media (max-width: 770px) {
+.btn-delete,
+.btn-edit {
+  color: #868686;
+}
+
+.btn-edit:hover {
+  background-color: #0d8ce0;
+  color: #fff;
+}
+
+.btn-delete:hover {
+  background-color: #e22f2f;
+  color: #fff;
+}
+
+.bg-danger-rifas {
+  background-color: #e22f2f;
+}
+
+.bg-success-rifas {
+  background-color: #0bcb55;
+}
+
+.btn-danger-rifas {
+  background-color: #e23d3d;
+  border: 1px solid #b10909;
+}
+
+.btn-danger-rifas:hover {
+  background-color: #c81b1b;
+}
+
+.btn-success-rifas {
+  background-color: #0bcb55;
+  border: 1px solid #04ae04;
+}
+
+.btn-success-rifas:hover {
+  background-color: #049a3e;
+}
+
+.btn-warning-rifas {
+  background-color: #e6b631;
+  border: 1px solid #ad8311;
+}
+
+.btn-warning-rifas:hover {
+  background-color: #cc9b14;
+}
+
+.btn-info-rifas {
+  background-color: #20bfef;
+  border: 1px solid #109ac4;
+}
+
+.btn-info-rifas:hover {
+  background-color: #0a9cc9;
+}
+
+.btn-primary-rifas {
+  background-color: #2087ef;
+  border: 1px solid #055cb3;
+}
+
+.btn-primary-rifas:hover {
+  background-color: #0968c8;
+}
+
+.expand-animation {
+  animation-delay: 0s; /* Tiempo de iniciarse el efecto*/
+  animation-direction: normal; /* Direccion en la que saldrá el efecto */
+  animation-duration: 1s; /* Timepo que durará el efecto en completarse */
+  animation-iteration-count: 1; /* Ttotal de veces que repite el efecto */
+  animation-name: growshrink; /* Nombre del keyframe (efecto) */
+}
+
+@keyframes growshrink {
+  0% {
+    scale: 10%;
+  }
+
+  50% {
+    scale: 100%;
+  }
+}
+
+@media (max-width: 1000px) {
   .btn-close-sesion {
     margin-left: 0 !important;
     margin-top: 10px !important;

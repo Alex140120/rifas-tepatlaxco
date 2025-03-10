@@ -14,6 +14,7 @@ import {
 
 import { ActualizarMain } from "../../Global/CambiarModulo";
 import Principal from "../Principal";
+import { ModuloGeneral } from "../../store/StoreGeneral";
 
 export default function Panel() {
   const navigate = useNavigate();
@@ -34,6 +35,8 @@ export default function Panel() {
   const handleCerrarSesion = () => {
     localStorage.removeItem("key");
     navigate("/adms");
+    const setModulo = ModuloGeneral.getState().setModulo;
+    setModulo("principal");
   };
 
   const obtenerInformacionUsuario = async () => {
@@ -99,7 +102,7 @@ export default function Panel() {
           </button>
         </aside>
         <div className="principal p-3">
-          <Principal/>
+          <Principal />
         </div>
       </div>
       <ToastContainer />

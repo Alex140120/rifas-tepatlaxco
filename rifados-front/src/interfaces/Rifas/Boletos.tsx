@@ -2,9 +2,32 @@ import { faAdd } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import ModalAgregarBoletos from "./ModalAgregarBoletos";
+import { getData } from "../../api/apiRequest";
+import Spinner from "../../components/Tags/Spinner";
+
+interface DatosProductoI {
+  id: number;
+  rangoInicial: number;
+  rangoFinal: number;
+}
+
+interface ProductoResponseI {
+  producto: DatosProductoI;
+}
 
 export default function Boletos() {
   const numBoletos = 120;
+
+  const [carga, setCarga] = useState<boolean>(false);
+
+  const [idProducto, setIdProducto] = useState<number | null>(null);
+
+  const [rangoInicialBoletos, setRangoInicialBoletos] = useState<number | null>(
+    null
+  );
+  const [rangoFinalBoletos, setRangoFinalBoletos] = useState<number | null>(
+    null
+  );
 
   const [showAddBoletos, setShowAddBoletos] = useState<boolean>(false);
 
@@ -18,15 +41,57 @@ export default function Boletos() {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  useEffect(() => {
+    extraerProductoRifado();
+  }, []);
+
+  const extraerProductoRifado = async () => {
+    try {
+      const response = await getData<ProductoResponseI>(
+        "extraerBoletosRifaActiva",
+        null
+      );
+      const { status, data } = response;
+      //console.log(status);
+      //console.log(data);
+      if (status === 204) {
+      }
+      if (status === 200) {
+        setIdProducto(data.producto.id);
+        setRangoInicialBoletos(data.producto.rangoInicial);
+        setRangoFinalBoletos(data.producto.rangoFinal);
+      }
+    } catch (error: any) {
+      if (error.response) {
+        // obtener el status y los datos de la respuesta
+        const { status, data } = error.response;
+        console.log(
+          `status: ${status} | error: ${data.error} | message: ${data.message}`
+        );
+      } else {
+        // Si no hay `response` (error de red u otro problema)
+        console.log("Error de red o configuración:", error.message);
+      }
+    } finally {
+      setCarga(true);
+    }
+  };
+
   // Agregar las propiedades de los boletos
   useEffect(() => {
-    for (let index = 0; index < numBoletos; index++) {
-      setPropiedades((prevProp) => ({
-        ...prevProp,
-        [`bto${index}`]: "bg-inactive",
-      }));
+    if (idProducto && rangoInicialBoletos && rangoFinalBoletos) {
+      for (
+        let index = rangoInicialBoletos;
+        index <= rangoFinalBoletos;
+        index++
+      ) {
+        setPropiedades((prevProp) => ({
+          ...prevProp,
+          [`bto${index}`]: "bg-inactive",
+        }));
+      }
     }
-  }, []);
+  }, [idProducto, rangoInicialBoletos, rangoFinalBoletos]);
 
   const handleSeleccionarBoleto = (index: number) => {
     const boleto = propiedades[`bto${index}`];
@@ -72,42 +137,68 @@ export default function Boletos() {
           <span className="separator"></span>
         </div>
       </div>
-      {showAddBoletos ? (
-        <div className="w-100 d-flex justify-content-center mt-3">
-          <button
-            className="btn btn-add-boletos outline-none rounded-4"
-            onClick={() => {
-                handleShow();
-            }}
-          >
-            <FontAwesomeIcon icon={faAdd} className="me-1" />
-            Agregar Boletos
-          </button>
-        </div>
-      ) : null}
+      {carga ? (
+        <>
+          {showAddBoletos ? (
+            <div className="w-100 d-flex justify-content-center mt-3 expand-animation">
+              <button
+                className="btn btn-add-boletos outline-none rounded-4"
+                onClick={() => {
+                  handleShow();
+                }}
+              >
+                <FontAwesomeIcon icon={faAdd} className="me-1" />
+                Agregar Boletos
+              </button>
+            </div>
+          ) : null}
 
-      <div className="w-100 mt-3 p-1 d-flex align-items-center justify-content-center mb-5">
-        <div
-          id="boletos"
-          className="container-boletos rounded-3 py-2 px-3 d-flex flex-row gap-2 flex-wrap justify-content-between"
-        >
-          {Array.from({ length: numBoletos }, (_, index: number) => (
-            <button
-              key={index}
-              className={`btn btn-boleto py-1 px-2 ${
-                propiedades[`bto${index}`]
-              }`}
-              onClick={() => {
-                handleSeleccionarBoleto(index);
-              }}
+          <div className="w-100 mt-3 p-1 d-flex align-items-center justify-content-center mb-5 expand-animation">
+            <div
+              id="boletos"
+              className="container-boletos rounded-3 py-2 px-3 d-flex flex-row gap-2 flex-wrap justify-content-between"
             >
-              {index}
-            </button>
-          ))}
+              {idProducto && rangoInicialBoletos && rangoFinalBoletos ? (
+                <>
+                  {Array.from(
+                    {
+                      length: rangoFinalBoletos - rangoInicialBoletos + 1,
+                    },
+                    (_, index: number) => {
+                      const boletoIndex = rangoInicialBoletos + index;
+                      return (
+                        <button
+                          key={boletoIndex}
+                          className={`btn btn-boleto py-1 px-2 ${
+                            propiedades[`bto${boletoIndex}`]
+                          }`}
+                          onClick={() => handleSeleccionarBoleto(boletoIndex)}
+                        >
+                          {boletoIndex}
+                        </button>
+                      );
+                    }
+                  )}
+                </>
+              ) : (
+                <div className="w-100 text-center">
+                  <h6>No hay boletos disponibles.</h6>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="w-100 text-center">
+          <Spinner />
         </div>
-      </div>
+      )}
 
-      <ModalAgregarBoletos show={show} handleClose={handleClose} boletos={boletosSeleccionados}/>
+      <ModalAgregarBoletos
+        show={show}
+        handleClose={handleClose}
+        boletos={boletosSeleccionados}
+      />
     </div>
   );
 }

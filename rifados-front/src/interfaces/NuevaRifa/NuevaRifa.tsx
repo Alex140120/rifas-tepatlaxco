@@ -11,6 +11,7 @@ import Swal from "sweetalert2";
 import { postData } from "../../api/apiRequest";
 import { ToastContainer } from "react-toastify";
 import { notifySuccess, notifyError } from "../../components/Alertas/Alertas";
+import Alerta from "../../components/Alertas/Alerta";
 
 interface ResponseI {
   output: boolean;
@@ -27,10 +28,16 @@ export default function NuevaRifa() {
   const [arrayNombreArchivos, setArrayNombreArchivos] = useState<string[]>([]);
   const [arrayArchivos, setArrayArchivos] = useState<File[]>([]);
 
-  const [cantidadBoletos, setCantidadBoletos] = useState<string>("");
-  const [disCantidadBoletos, setDisCantidadBoletos] = useState<boolean>(true);
-
   const [disabled, setDisabled] = useState<boolean>(true);
+
+  const [rangoInicialBoletos, setRangoInicialBoletos] = useState<number>(1);
+  const [disRangoInicial, setDisRangoInicial] = useState<boolean>(true);
+
+  const [rangoFinalBoletos, setRangoFinalBoletos] = useState<number>(2);
+  const [disRangoFinal, setDisRangoFinal] = useState<boolean>(true);
+
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [showAlert2, setShowAlert2] = useState<boolean>(false);
 
   // Selección de archivos (agregar nombre, agregar archivos)
   const handleSelecionarArchivos = async (
@@ -166,39 +173,53 @@ export default function NuevaRifa() {
   // onChange Nombre Producto
   useEffect(() => {
     if (descripcionProducto) {
-      setDisBtnAddFiles(false);
+      setDisRangoInicial(false);
+      setDisRangoFinal(false);
+    } else {
+      setDisRangoInicial(true);
+      setDisRangoFinal(true);
+
+      setRangoInicialBoletos(0);
+      setRangoFinalBoletos(0);
+    }
+  }, [descripcionProducto]);
+
+  // onChange Rango Inicial y Final
+  useEffect(() => {
+    if (
+      rangoInicialBoletos !== 0 &&
+      rangoInicialBoletos !== null &&
+      rangoFinalBoletos !== 0 &&
+      rangoFinalBoletos !== null
+    ) {
+      if (showAlert || showAlert2) {
+        setDisBtnAddFiles(true);
+      } else {
+        setDisBtnAddFiles(false);
+      }
     } else {
       setDisBtnAddFiles(true);
       setArrayArchivos([]);
       setArrayNombreArchivos([]);
     }
-  }, [descripcionProducto]);
+  }, [rangoInicialBoletos, rangoFinalBoletos, showAlert, showAlert2]);
 
   // onChange Files
   useEffect(() => {
     if (arrayNombreArchivos.length > 0) {
-      setDisCantidadBoletos(false);
-    } else {
-      setDisCantidadBoletos(true);
-      setCantidadBoletos("");
-    }
-  }, [arrayNombreArchivos]);
-
-  // onChange Cantidad Boletos
-  useEffect(() => {
-    if (cantidadBoletos && cantidadBoletos !== "0") {
       setDisabled(false);
     } else {
       setDisabled(true);
     }
-  }, [cantidadBoletos]);
+  }, [arrayNombreArchivos]);
 
   const handleGuardarNuevaRifa = async () => {
     const formData = new FormData();
 
     formData.append("nombreProducto", nombreProducto);
     formData.append("descripcionProducto", descripcionProducto);
-    formData.append("cantidadBoletos", cantidadBoletos);
+    formData.append("rangoInicial", rangoInicialBoletos.toString());
+    formData.append("rangoFinal", rangoFinalBoletos.toString());
     for (let i = 0; i < arrayArchivos.length; i++) {
       formData.append("archivos[]", arrayArchivos[i]);
     }
@@ -209,14 +230,14 @@ export default function NuevaRifa() {
       const { status } = response;
 
       console.log(response);
-      
 
       if (status === 200) {
         notifySuccess("El producto se ha guardado exitosamente.", "top-center");
         setNombreProducto("");
         setDescripcionProducto("");
         setArrayArchivos([]);
-        setCantidadBoletos("");
+        setRangoInicialBoletos(1);
+        setRangoFinalBoletos(2);
       }
     } catch (error: any) {
       if (error.response) {
@@ -240,8 +261,28 @@ export default function NuevaRifa() {
     <div className="container-modulo px-3 py-2 rounded-3">
       <h2>Nueva Rifa</h2>
       <hr />
-      <div className="w-100 px-3">
-        <div className="row border pb-3 ">
+      <div className="w-100">
+        {showAlert ? (
+          <div className="w-100 mb-3">
+            <Alerta
+              header="¡Atención!"
+              body="Es obligatorio llenar todos los campos."
+              clases="alerta-danger expand-animation"
+            />
+          </div>
+        ) : null}
+
+        {showAlert2 ? (
+          <div className="w-100 mb-3">
+            <Alerta
+              header="¡Atención!"
+              body="El rango final debe ser mayor al rango inicial."
+              clases="alerta-danger expand-animation"
+            />
+          </div>
+        ) : null}
+
+        <div className="row pb-3">
           <div className="col-lg-6 col-md-6 col-sm-12">
             <InputText
               disabled={false}
@@ -258,6 +299,44 @@ export default function NuevaRifa() {
               valor={descripcionProducto}
               onChange={(e) => setDescripcionProducto(e.target.value)}
             />
+          </div>
+
+          <div className="col-lg-12 col-md-12 col-sm-12 mt-3">
+            <div className="row">
+              <div className="col-lg-6 col-md-6 col-xs-12">
+                <div className="t4 mb-2">Rango incial boletos: </div>
+                <InputText
+                  disabled={disRangoInicial}
+                  placeHolder="Rango inicial"
+                  valor={rangoInicialBoletos}
+                  tipoValor="numero"
+                  onChange={(valor) => {
+                    setRangoInicialBoletos(valor);
+                    setShowAlert(!valor ? true : false);
+                    setShowAlert2(
+                      parseInt(valor) > rangoFinalBoletos ? true : false
+                    );
+                  }}
+                />
+              </div>
+
+              <div className="col-lg-6 col-md-6 col-xs-12">
+                <div className="t4 mb-2">Rango final boletos: </div>
+                <InputText
+                  disabled={disRangoFinal}
+                  placeHolder="Rango final"
+                  valor={rangoFinalBoletos}
+                  tipoValor="numero"
+                  onChange={(valor) => {
+                    setRangoFinalBoletos(valor);
+                    setShowAlert(!valor ? true : false);
+                    setShowAlert2(
+                      parseInt(valor) < rangoInicialBoletos ? true : false
+                    );
+                  }}
+                />
+              </div>
+            </div>
           </div>
 
           <div className="col-lg-12 col-md-12 col-sm-12">
@@ -284,7 +363,7 @@ export default function NuevaRifa() {
             </div>
             {arrayNombreArchivos.length > 0 ? (
               <div className="mt-0">
-                <table className="t2 files-table">
+                <table className="t3 files-table">
                   <thead>
                     <tr>
                       <th>No.</th>
@@ -297,15 +376,17 @@ export default function NuevaRifa() {
                       <tr key={index}>
                         <td>{index + 1}</td>
                         <td>{file}</td>
-                        <td className="d-flex justify-content-center">
-                          <button
-                            className="button-delete-file"
-                            onClick={() => {
-                              eliminarArchivo(index);
-                            }}
-                          >
-                            <FontAwesomeIcon icon={faTimes} />
-                          </button>
+                        <td>
+                          <div className="w-100 d-flex">
+                            <button
+                              className="btn-danger-rifas m-auto rounded-1 t5"
+                              onClick={() => {
+                                eliminarArchivo(index);
+                              }}
+                            >
+                              <FontAwesomeIcon icon={faTimes} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -315,19 +396,9 @@ export default function NuevaRifa() {
             ) : null}
           </div>
 
-          <div className="col-lg-12 col-md-12 col-sm-12">
-            <InputText
-              disabled={disCantidadBoletos}
-              placeHolder="Cantidad de Boletos"
-              valor={cantidadBoletos}
-              tipoValor="numero"
-              onChange={(valor) => setCantidadBoletos(valor)}
-            />
-          </div>
-
           <div className="w-100 d-flex justify-content-center align-items-center mt-3">
             <button
-              className="t1 btn-aside border rounded-2 p-3"
+              className="t1 btn-aside border rounded-2 p-2"
               disabled={disabled}
               onClick={() => {
                 handleGuardarNuevaRifa();

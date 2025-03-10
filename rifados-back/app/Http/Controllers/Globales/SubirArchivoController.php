@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Globales;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class SubirArchivoController extends Controller
@@ -99,7 +100,7 @@ class SubirArchivoController extends Controller
             $codigo_transaccion = 2;
         }
 
-        return ([$codigo_transaccion, $path2 ] );
+        return ([$codigo_transaccion, $path2]);
     }
 
     public function EliminarArchivo($nomFolder, $nombreArchivo)
@@ -113,9 +114,8 @@ class SubirArchivoController extends Controller
 
         # Si existe el archivo => borrar
         if (file_exists($path)) {
-          
-            return unlink($path);
 
+            return unlink($path);
         }
 
         return false;

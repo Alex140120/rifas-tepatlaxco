@@ -1,51 +1,116 @@
 import { Carousel } from "react-bootstrap";
 
-import Iphone0 from "../../public/productos/iphone0.jpg";
-import Iphone1 from "../../public/productos/iphone1.jpg"; // Asegúrate de usar imágenes diferentes
 import Boletos from "./Rifas/Boletos";
+import { useEffect, useState } from "react";
+import { getData } from "../api/apiRequest";
+import Spinner from "../components/Tags/Spinner";
+
+interface ImagenesI {
+  ruta: string;
+  nombrearchivo: string;
+}
+
+interface DatosProductoI {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  boletos: number;
+  imagenes: ImagenesI[];
+}
+
+interface ProductoResponseI {
+  producto: DatosProductoI;
+}
 
 export default function Rifas() {
+  const [carga, setCarga] = useState<boolean>(false);
+
+  const [idProducto, setIdProducto] = useState<number | null>(null);
+  const [nombre, setNombre] = useState<string>("");
+  const [descripcion, setDescripcion] = useState<string>("");
+  const [imagenes, setImagenes] = useState<ImagenesI[]>([]);
+
+  useEffect(() => {
+    extraerProductoRifado();
+  }, []);
+
+  const extraerProductoRifado = async () => {
+    try {
+      const response = await getData<ProductoResponseI>(
+        "extraerProductoRifado",
+        null
+      );
+      const { status, data } = response;
+      //console.log(status);
+      //console.log(data);
+      if (status === 204) {
+      }
+      if (status === 200) {
+        setIdProducto(data.producto.id);
+        setNombre(data.producto.nombre);
+        setDescripcion(data.producto.descripcion);
+        setImagenes(data.producto.imagenes);
+      }
+    } catch (error: any) {
+      if (error.response) {
+        // obtener el status y los datos de la respuesta
+        const { status, data } = error.response;
+        console.log(
+          `status: ${status} | error: ${data.error} | message: ${data.message}`
+        );
+      } else {
+        // Si no hay `response` (error de red u otro problema)
+        console.log("Error de red o configuración:", error.message);
+      }
+    } finally {
+      setCarga(true);
+    }
+  };
+
   return (
     <>
-      <div className="w-100 p-0 m-0 bg-dark">
-        <Carousel interval={2500}>
-          <Carousel.Item>
-            <div className="carousel-image-container">
-              <img className="d-block img-product-carousel" src={Iphone0} />
-              <div className="overlay" />
-              <Carousel.Caption>
-                <h1>IPhone 13 Pro</h1>
-                <div className="m-auto text-justify">
-                  <p className="text-light translucent-black">
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                    Laborum ipsum accusantium repellat quis vitae neque
-                    laudantium voluptatibus ducimus delectus a, id dolore velit
-                    odit tempore obcaecati ex? Harum, libero ducimus!
-                  </p>
-                </div>
-              </Carousel.Caption>
-            </div>
-          </Carousel.Item>
-          <Carousel.Item>
-            <div className="carousel-image-container">
-              <img className="d-block img-product-carousel" src={Iphone1} />
-              <div className="overlay" />
-              <Carousel.Caption>
-                <h1>IPhone 13 Pro</h1>
-                <div className="m-auto text-justify">
-                  <p className="text-light translucent-black">
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                    Laborum ipsum accusantium repellat quis vitae neque
-                    laudantium voluptatibus ducimus delectus a, id dolore velit
-                    odit tempore obcaecati ex? Harum, libero ducimus!
-                  </p>
-                </div>
-              </Carousel.Caption>
-            </div>
-          </Carousel.Item>
-        </Carousel>
+      <div>
+        {carga ? (
+          <div className="p-0 m-0 bg-light expand-animation m-auto">
+            {imagenes.length ? (
+              <Carousel interval={2500}>
+                {imagenes.map((item, index) => (
+                  <Carousel.Item key={index}>
+                    <div className="carousel-image-container">
+                      <img
+                        className="d-block img-product-carousel"
+                        src={item.ruta}
+                      />
+                      <div className="overlay" />
+                      <Carousel.Caption>
+                        <h1>{nombre}</h1>
+                        <div className="m-auto text-justify">
+                          <p className="text-light translucent-black t3">
+                            {descripcion}
+                          </p>
+                        </div>
+                      </Carousel.Caption>
+                    </div>
+                  </Carousel.Item>
+                ))}
+              </Carousel>
+            ) : null}
+            {!idProducto ? (
+              <div
+                className="w-100 mt-5 mb-3 text-center epxand-animation"
+                style={{ background: "#eee" }}
+              >
+                <h5>No hay rifas por el momento.</h5>
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <div className="text-center w-100 pt-3 pb-2">
+            <Spinner />
+          </div>
+        )}
       </div>
-      <Boletos/>
+      <Boletos />
     </>
   );
 }

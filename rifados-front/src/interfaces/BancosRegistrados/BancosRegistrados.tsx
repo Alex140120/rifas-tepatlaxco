@@ -14,6 +14,7 @@ import {
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import ModalAgregarBanco from "./Complementos/ModalAgregarBanco";
 import Swal from "sweetalert2";
+import ModalUsuariosBanco from "../../components/Modales/ModalUsuariosBanco";
 
 interface ColumnasI {
   field: string | number | boolean;
@@ -41,9 +42,19 @@ interface BancoI {
 export default function BancosRegistrados() {
   const [carga, setCarga] = useState<boolean>(false);
 
+  const [showUsersBank, setShowUsersBank] = useState<boolean>(false);
+  const handleShowUsersBank = () => setShowUsersBank(true);
+  const handleCloseUsersBank = () => {
+    setShowUsersBank(false);
+    setDatosBanco(null);
+  };
+
   const [showAddBanco, setShowAddBanco] = useState<boolean>(false);
   const handleShowNewBank = () => setShowAddBanco(true);
-  const handleCloseNewBank = () => setShowAddBanco(false);
+  const handleCloseNewBank = () => {
+    setShowAddBanco(false);
+    setDatosBanco(null);
+  };
 
   const [tipoTransaccion, setTipoTransaccion] = useState<string>("");
   const [datosBanco, setDatosBanco] = useState<BancoI | null>(null);
@@ -78,7 +89,14 @@ export default function BancosRegistrados() {
             >
               <button
                 className={`t3 rounded-1 btn-primary-rifas text-light t4 px-1`}
-                onClick={() => {}}
+                onClick={() => {
+                  handleShowUsersBank();
+                  setDatosBanco({
+                    id: rowData.id,
+                    nombre_banco: rowData.nombre_banco,
+                    logo_banco: rowData.logo_banco,
+                  });
+                }}
               >
                 <FontAwesomeIcon icon={faUsers} />
               </button>
@@ -248,6 +266,12 @@ export default function BancosRegistrados() {
         actualizarBancos={(valor) => actualizarBancos(valor)}
         tipoTransaccion={tipoTransaccion}
         datosProps={datosBanco}
+      />
+
+      <ModalUsuariosBanco
+        show={showUsersBank}
+        handleClose={handleCloseUsersBank}
+        datos={datosBanco}
       />
     </div>
   );

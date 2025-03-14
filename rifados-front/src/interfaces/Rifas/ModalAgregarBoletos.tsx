@@ -121,7 +121,7 @@ export default function ModalAgregarBoletos({
     try {
       const response = await instance.post("/subirArchivo", formData);
       
-      console.log(response.data);
+      //console.log(response.data);
       setArchivoSubido(response.data.response);
       
     } catch (error) {

@@ -85,7 +85,7 @@ export default function BancosRegistrados() {
           {rowData.cuentas > 0 ? (
             <OverlayTrigger
               placement="top"
-              overlay={<Tooltip>Usuarios registrados</Tooltip>}
+              overlay={<Tooltip>Cuentas registradas</Tooltip>}
             >
               <button
                 className={`t3 rounded-1 btn-primary-rifas text-light t4 px-1`}

@@ -12,7 +12,11 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::post("/login", [AdministradoresController::class, 'logueoAdministradores']);
+Route::controller(AdministradoresController::class)->group(function () {
+    Route::post('/login', 'logueoAdministradores');
+    Route::get('/bancosRegistradosCliente', 'bancosRegistrados');
+    Route::get('/usuariosBancoSeleccionado', 'usuariosBancoSeleccionado');
+});
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::controller(AdministradoresController::class)->group(function () {
@@ -21,7 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/guardarNuevoBanco', 'guardarNuevoBanco');
         Route::post('/actualizarBanco', 'actualizarBanco');
         Route::post('/eliminarBanco', 'eliminarBanco');
-        Route::get('/usuariosBancoSeleccionado', 'usuariosBancoSeleccionado');
+        //Route::get('/usuariosBancoSeleccionado', 'usuariosBancoSeleccionado');
     });
 });
 

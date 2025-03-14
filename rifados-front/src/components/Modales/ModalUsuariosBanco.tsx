@@ -114,10 +114,6 @@ export default function ModalUsuariosBanco({
                       <p className="m-0 w-25">No. Tarjeta:</p>
                       <p className="m-0 w-75">{cuenta.no_tarjeta}</p>
                     </div>
-                    <div className="d-flex" style={{ fontSize: "15px" }}>
-                      <p className="m-0 w-25">Teléfono:</p>
-                      <p className="m-0 w-75">{cuenta.telefono}</p>
-                    </div>
                   </div>
                 ))
               ) : (

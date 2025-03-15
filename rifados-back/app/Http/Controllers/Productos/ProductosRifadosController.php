@@ -26,6 +26,7 @@ class ProductosRifadosController extends Controller
         $params = $request->validate([
             'nombreProducto'        => 'required|string',
             'descripcionProducto'   => 'required|string',
+            'precioBoleto'          => 'required|int',
             'rangoInicial'          => 'required|int',
             'rangoFinal'            => 'required|int',
             'archivos'              => 'required'
@@ -33,6 +34,7 @@ class ProductosRifadosController extends Controller
 
         $nombreProducto = $params['nombreProducto'];
         $descripcionProducto = $params['descripcionProducto'];
+        $precioBoleto = $params['precioBoleto'];
         $rangoInicial = $params['rangoInicial'];
         $rangoFinal = $params['rangoFinal'];
 
@@ -50,7 +52,8 @@ class ProductosRifadosController extends Controller
                     'id_usuario'    => $id_usuario,
                     'en_rifa'       => $status_enRifa,
                     'rangoInicial'  => $rangoInicial,
-                    'rangoFinal'    => $rangoFinal
+                    'rangoFinal'    => $rangoFinal,
+                    'precioBoleto'  => $precioBoleto
                 ]
             );
 
@@ -146,7 +149,8 @@ class ProductosRifadosController extends Controller
                     'ta.en_rifa AS status',
                     DB::raw("CONCAT(tb.nombres, ' ', tb.apellido_p, ' ', tb.apellido_m) as nombreUser"),
                     'rangoInicial',
-                    'rangoFinal'
+                    'rangoFinal',
+                    'precioBoleto'
                 )
                 ->orderBy('id', 'DESC')
                 ->get();

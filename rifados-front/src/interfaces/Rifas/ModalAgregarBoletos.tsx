@@ -17,6 +17,8 @@ import Alerta from "../../components/Alertas/Alerta";
 import Swal from "sweetalert2";
 import instance from "../../api/axios";
 import InputFile from "../../components/Tags/InputFile";
+import { notifyError } from "../../components/Alertas/Alertas";
+import { postData } from "../../api/apiRequest";
 
 interface Props {
   show: boolean;
@@ -120,10 +122,9 @@ export default function ModalAgregarBoletos({
   const handleSubirArchivo = async (formData: FormData) => {
     try {
       const response = await instance.post("/subirArchivo", formData);
-      
-      console.log(response.data);
+
+      //console.log(response.data);
       setArchivoSubido(response.data.response);
-      
     } catch (error) {
       console.log(error);
     }
@@ -322,7 +323,7 @@ export default function ModalAgregarBoletos({
     codigoPostal,
     alerta,
     mostrarOcultarBtn,
-    archivoSubido
+    archivoSubido,
   ]);
 
   const handleChangeNumero = (numero: any) => {
@@ -338,10 +339,10 @@ export default function ModalAgregarBoletos({
       localidad,
       domicilio,
       codigoPostal,
-      archivoSubido
+      archivoSubido,
     };
     console.log(datos);
-    
+
     if (
       nombre !== "" &&
       numTelefono !== "" &&
@@ -386,17 +387,42 @@ export default function ModalAgregarBoletos({
     }
   };
 
-  const ejecutarGuardadoDatos = (datos: Object) => {
+  const ejecutarGuardadoDatos = async (datos: Object) => {
     console.log(datos);
-    setAlerta(
-      <Alerta
-        clases="alerta-success"
-        header=""
-        body={`Tus datos han sido guardados exitosamente. <br/> 
-          Presiona el botón "Métodos de Pago" para ver todas las cuentas donde puedes realizar las transferencias por el monto correspondiente.`}
-      />
-    );
-    setMostrarOcultarBtn(true);
+    try {
+      const response = await postData("guardarDatosRifa", datos);
+      const { status, data } = response;
+      if (status === 200) {
+        setAlerta(
+          <Alerta
+            clases="alerta-success"
+            header=""
+            body={`Tus datos han sido guardados exitosamente. <br/> 
+              Presiona el botón "Métodos de Pago" para ver todas las cuentas donde puedes realizar las transferencias por el monto correspondiente.`}
+          />
+        );
+        setMostrarOcultarBtn(true);
+      }
+    } catch (error: any) {
+      if (error.response) {
+        setAlerta(
+          <Alerta
+            clases="alerta-danger"
+            header=""
+            body={`Algo salió mal. <br/> 
+              Sus datos no se han podido guardar, inténtelo nuevamente.`}
+          />
+        );
+        // obtener el status y los datos de la respuesta
+        const { status, data } = error.response;
+        console.log(
+          `status: ${status} | error: ${data.error} | message: ${data.message}`
+        );
+      } else {
+        // Si no hay `response` (error de red u otro problema)
+        console.log("Error de red o configuración:", error.message);
+      }
+    }
   };
 
   function verMetodosPago() {

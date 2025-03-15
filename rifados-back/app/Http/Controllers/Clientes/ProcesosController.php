@@ -80,4 +80,9 @@ class ProcesosController extends Controller
             return response()->json(['error' => $th->getMessage()], 500);
         }
     }
+
+    public function guardarDatosRifa()
+    {
+        return response()->json(['output' => true], 200);
+    }
 }

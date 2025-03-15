@@ -22,6 +22,7 @@ interface FilasI {
   rangoInicial: number;
   rangoFinal: number;
   nombreUser: string;
+  precioBoleto: number;
   [key: string]: any; // Firma de índice añadida
 }
 
@@ -35,6 +36,7 @@ export default function ProductosRifados() {
   const columnas: ColumnasI[] = [
     { field: "nombre", header: "Producto" },
     { field: "statusRifa", header: "En Rifa" },
+    { field: "precioBoleto", header: "Precio Boleto" },
     { field: "rangoInicial", header: "Rango Inicial Boletos" },
     { field: "rangoFinal", header: "Rango Final Boletos" },
     { field: "nombreUser", header: "Subido por" },
@@ -77,6 +79,10 @@ export default function ProductosRifados() {
             Rifado
           </button>
         </div>
+      );
+    } else if (field === "precioBoleto") {
+      return (
+        <>$ {rowData.precioBoleto}</>
       );
     } else if (field === "acciones") {
       return (

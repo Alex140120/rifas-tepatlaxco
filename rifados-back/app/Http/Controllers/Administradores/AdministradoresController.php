@@ -188,4 +188,31 @@ class AdministradoresController extends Controller
             return response()->json(['error' => $th->getMessage()], 500);
         }
     }
+
+    public function usuariosBancoSeleccionado(Request $request)
+    {
+        $param = $request->validate([
+            'id' => 'required|int'
+        ]);
+
+        $idBanco = $param['id'];
+
+        try {
+
+            $cuentas = DB::table('cuentas_bancarias AS ta')
+                ->leftJoin('usuarios AS tb', 'ta.id_titular', '=', 'tb.id')
+                ->select(
+                    DB::raw("CONCAT(tb.nombres, ' ', tb.apellido_p, ' ', tb.apellido_m) AS titularCuenta"),
+                    'ta.clabe',
+                    'ta.no_tarjeta',
+                    'tb.telefono'
+                )
+                ->where('ta.banco', $idBanco)
+                ->get();
+
+            return response()->json(['cuentas' => $cuentas], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
 }

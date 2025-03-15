@@ -32,6 +32,7 @@ interface FilasI {
   rangoInicial: number;
   rangoFinal: number;
   nombreUser: string;
+  precioBoleto: number;
   [key: string]: any; // Firma de índice añadida
 }
 
@@ -57,6 +58,9 @@ export default function ModalEditarProducto({
   const [nombreProducto, setNombreProducto] = useState<string>("");
 
   const [descripcionProducto, setDescripcionProducto] = useState<string>("");
+
+  const [precioBoleto, setPrecioBoleto] = useState<number | string>("");
+
   const [archivos, setArchivos] = useState<ImagenesI[]>([]);
 
   const [rangoInicialBoletos, setRangoInicialBoletos] = useState<number>(0);
@@ -78,6 +82,7 @@ export default function ModalEditarProducto({
         extraerArchivos(productoSeleccionado.id);
         setNombreProducto(productoSeleccionado.nombre);
         setDescripcionProducto(productoSeleccionado.descripcion);
+        setPrecioBoleto(productoSeleccionado.precioBoleto);
         setRangoInicialBoletos(productoSeleccionado.rangoInicial);
         setRangoFinalBoletos(productoSeleccionado.rangoFinal);
       }
@@ -85,6 +90,7 @@ export default function ModalEditarProducto({
       setCarga(false);
       setNombreProducto("");
       setDescripcionProducto("");
+      setPrecioBoleto("");
       setRutaImagen("");
       setArchivos([]);
       setArrayArchivos([]);
@@ -400,6 +406,21 @@ export default function ModalEditarProducto({
                   </div>
 
                   <div className="col-lg-12 col-md-12 col-sm-12 mt-3">
+                  <div className="t4 mb-2">Precio boleto: </div>
+                    <InputText
+                      disabled={true}
+                      placeHolder="Precio de boleto"
+                      valor={precioBoleto}
+                      tipoValor="numero"
+                      onChange={(e) => {
+                        setPrecioBoleto(e);
+                        setDisabledBtnGuardar(!e ? true : false);
+                        setShowAlert(!e ? true : false);
+                      }}
+                    />
+                  </div>
+
+                  <div className="col-lg-12 col-md-12 col-sm-12 mt-3">
                     <div className="row">
                       <div className="col-lg-6 col-md-6 col-xs-12">
                         <div className="t4 mb-2">Rango incial boletos: </div>
@@ -413,21 +434,17 @@ export default function ModalEditarProducto({
                             setDisabledBtnGuardar(!valor ? true : false);
                             setShowAlert(!valor ? true : false);
                             setShowAlert2(
-                              parseInt(valor) > rangoFinalBoletos
-                                ? true
-                                : false
+                              parseInt(valor) > rangoFinalBoletos ? true : false
                             );
                             setDisabledBtnGuardar(
-                              parseInt(valor) > rangoFinalBoletos
-                                ? true
-                                : false
+                              parseInt(valor) > rangoFinalBoletos ? true : false
                             );
                           }}
                         />
                       </div>
 
                       <div className="col-lg-6 col-md-6 col-xs-12">
-                      <div className="t4 mb-2">Rango final boletos: </div>
+                        <div className="t4 mb-2">Rango final boletos: </div>
                         <InputText
                           disabled={false}
                           placeHolder="Rango final"

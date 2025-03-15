@@ -56,3 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/eliminarImagenProducto', 'eliminarImagenProducto');
     });
 });
+
+Route::controller(ProcesosController::class)->group(function () {
+    Route::post("/guardarDatosRifa", "guardarDatosRifa");
+});

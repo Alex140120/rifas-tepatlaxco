@@ -24,6 +24,9 @@ export default function NuevaRifa() {
   const [disDescripcionProducto, setDisDescripcionProducto] =
     useState<boolean>(true);
 
+  const [precioBoleto, setPrecioBoleto] = useState<number | string>("");
+  const [disPrecioBoleto, setDisPrecioBoleto] = useState<boolean>(true);
+
   const [disBtnAddFiles, setDisBtnAddFiles] = useState<boolean>(true);
   const [arrayNombreArchivos, setArrayNombreArchivos] = useState<string[]>([]);
   const [arrayArchivos, setArrayArchivos] = useState<File[]>([]);
@@ -173,6 +176,16 @@ export default function NuevaRifa() {
   // onChange Nombre Producto
   useEffect(() => {
     if (descripcionProducto) {
+      setDisPrecioBoleto(false);
+    } else {
+      setPrecioBoleto("");
+      setDisPrecioBoleto(true);
+    }
+  }, [descripcionProducto]);
+
+  // onChange Nombre Producto
+  useEffect(() => {
+    if (precioBoleto && precioBoleto !== 0) {
       setDisRangoInicial(false);
       setDisRangoFinal(false);
     } else {
@@ -182,7 +195,7 @@ export default function NuevaRifa() {
       setRangoInicialBoletos(0);
       setRangoFinalBoletos(0);
     }
-  }, [descripcionProducto]);
+  }, [precioBoleto]);
 
   // onChange Rango Inicial y Final
   useEffect(() => {
@@ -218,6 +231,7 @@ export default function NuevaRifa() {
 
     formData.append("nombreProducto", nombreProducto);
     formData.append("descripcionProducto", descripcionProducto);
+    formData.append("precioBoleto", precioBoleto.toString());
     formData.append("rangoInicial", rangoInicialBoletos.toString());
     formData.append("rangoFinal", rangoFinalBoletos.toString());
     for (let i = 0; i < arrayArchivos.length; i++) {
@@ -229,7 +243,7 @@ export default function NuevaRifa() {
 
       const { status } = response;
 
-      console.log(response);
+      //console.log(response);
 
       if (status === 200) {
         notifySuccess("El producto se ha guardado exitosamente.", "top-center");
@@ -298,6 +312,18 @@ export default function NuevaRifa() {
               placeHolder="Descripción del producto"
               valor={descripcionProducto}
               onChange={(e) => setDescripcionProducto(e.target.value)}
+            />
+          </div>
+
+          <div className="col-lg-6 col-md-6 col-sm-12 mt-3">
+            <InputText
+              disabled={disPrecioBoleto}
+              placeHolder="Precio boleto"
+              valor={precioBoleto}
+              tipoValor="numero"
+              onChange={(e) => {
+                setPrecioBoleto(parseInt(e) > 0 ? e : "");
+              }}
             />
           </div>
 
@@ -379,7 +405,7 @@ export default function NuevaRifa() {
                         <td>
                           <div className="w-100 d-flex">
                             <button
-                              className="btn-danger-rifas m-auto rounded-1 t5"
+                              className="btn-danger-rifas m-auto rounded-1 t5 text-light"
                               onClick={() => {
                                 eliminarArchivo(index);
                               }}

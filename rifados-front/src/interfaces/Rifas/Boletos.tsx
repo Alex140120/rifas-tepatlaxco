@@ -9,6 +9,7 @@ interface DatosProductoI {
   id: number;
   rangoInicial: number;
   rangoFinal: number;
+  precioBoleto: number;
 }
 
 interface ProductoResponseI {
@@ -16,7 +17,6 @@ interface ProductoResponseI {
 }
 
 export default function Boletos() {
-  const numBoletos = 120;
 
   const [carga, setCarga] = useState<boolean>(false);
 
@@ -30,6 +30,8 @@ export default function Boletos() {
   );
 
   const [showAddBoletos, setShowAddBoletos] = useState<boolean>(false);
+
+  const [precioBoleto, setPrecioBoleto] = useState<number | null>(null);
 
   const [propiedades, setPropiedades] = useState<Record<string, string>>({});
 
@@ -58,6 +60,7 @@ export default function Boletos() {
       }
       if (status === 200) {
         setIdProducto(data.producto.id);
+        setPrecioBoleto(data.producto.precioBoleto);
         setRangoInicialBoletos(data.producto.rangoInicial);
         setRangoFinalBoletos(data.producto.rangoFinal);
       }
@@ -198,6 +201,7 @@ export default function Boletos() {
         show={show}
         handleClose={handleClose}
         boletos={boletosSeleccionados}
+        precioBoleto={precioBoleto}
       />
     </div>
   );

@@ -66,6 +66,7 @@ class ProcesosController extends Controller
                 ->where('en_rifa', 1)
                 ->select(
                     'id',
+                    'precioBoleto',
                     'rangoInicial',
                     'rangoFinal'
                 )

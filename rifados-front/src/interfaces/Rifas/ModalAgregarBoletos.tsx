@@ -17,13 +17,13 @@ import Alerta from "../../components/Alertas/Alerta";
 import Swal from "sweetalert2";
 import instance from "../../api/axios";
 import InputFile from "../../components/Tags/InputFile";
-import { notifyError } from "../../components/Alertas/Alertas";
 import { postData } from "../../api/apiRequest";
 
 interface Props {
   show: boolean;
   handleClose: () => void;
   boletos: number[];
+  precioBoleto: number | null;
 }
 
 interface EstadosI {
@@ -42,7 +42,10 @@ export default function ModalAgregarBoletos({
   show,
   handleClose,
   boletos,
+  precioBoleto,
 }: Props) {
+  const [pagoTotal, setPagoTotal] = useState<number>(0);
+
   const [boletosUsuario, setBoletosUsuario] = useState<number[]>([]);
 
   const [nombre, setNombre] = useState<string>("");
@@ -68,8 +71,12 @@ export default function ModalAgregarBoletos({
   useEffect(() => {
     if (show && boletos.length) {
       setBoletosUsuario(boletos);
+      if (precioBoleto) {
+        setPagoTotal(precioBoleto * boletos.length);
+      }
       obtenerEstados();
     } else {
+      setPagoTotal(0);
       setContenido(<></>);
       setBoletosUsuario([]);
       setAlerta(<></>);
@@ -147,7 +154,7 @@ export default function ModalAgregarBoletos({
             ))}
           </div>
           <p className="m-0 mt-3">Total a pagar:</p>
-          <p className="m-0 mt-1 t0 fw-bold">$200</p>
+          <p className="m-0 mt-1 t0 fw-bold">${pagoTotal}</p>
           <hr />
           <div className="d-flex justify-content-left flex-column">
             <p className="m-0 text-start">
@@ -279,8 +286,14 @@ export default function ModalAgregarBoletos({
               </div>
               {/* Archivo */}
               <div className="col-lg-12 col-md-12 col-xs-12 mb-2">
+                <div className="w-100 text-start mt-2">
+                  <span className="t3 text-grey">
+                    Adjunta una imagen o archivo de tu identificación oficial
+                    (INE) en formato ".jpg", ".png", ".jpeg" o ".pdf":
+                  </span>
+                </div>
                 <InputFile
-                  extensiones=".pdf"
+                  extensiones=".pdf, .jpg, .png, .jpeg"
                   multiple={false}
                   onFormDataReady={handleSubirArchivo}
                 />

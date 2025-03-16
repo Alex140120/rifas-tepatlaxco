@@ -12,6 +12,10 @@ export default function Principal() {
 
   useEffect(() => {
     switch (modulo) {
+      case "carga":
+        setComponente(<></>);
+        break;
+
       case "usuarios":
         setComponente(<Usuarios />);
         break;

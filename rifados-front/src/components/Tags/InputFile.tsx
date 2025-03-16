@@ -8,12 +8,14 @@ interface Props {
   onFormDataReady: (formData: FormData) => void;
   extensiones: string;
   multiple: boolean;
+  disabled: boolean;
 }
 
 export default function InputFile({
   onFormDataReady,
   extensiones,
   multiple,
+  disabled,
 }: Props) {
   const [nombreArchivo, setNombreArchivo] = useState<string>("");
 
@@ -93,6 +95,7 @@ export default function InputFile({
           Seleccionar Archivo
         </label>
         <input
+          disabled={disabled}
           multiple={multiple}
           type="file"
           id="fileInput"

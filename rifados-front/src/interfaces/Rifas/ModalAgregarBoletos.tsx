@@ -24,6 +24,7 @@ interface Props {
   handleClose: () => void;
   boletos: number[];
   precioBoleto: number | null;
+  datosGuardados: () => void;
 }
 
 interface EstadosI {
@@ -38,12 +39,24 @@ interface LocalidadesI {
   tipo: string;
 }
 
+interface CamposI {
+  disNombre: boolean;
+  disNumero: boolean;
+  disEstado: boolean;
+  disLocalidad: boolean;
+  disDomicilio: boolean;
+  disCP: boolean;
+  disArchivo: boolean;
+}
+
 export default function ModalAgregarBoletos({
   show,
   handleClose,
   boletos,
   precioBoleto,
+  datosGuardados
 }: Props) {
+
   const [pagoTotal, setPagoTotal] = useState<number>(0);
 
   const [boletosUsuario, setBoletosUsuario] = useState<number[]>([]);
@@ -68,6 +81,16 @@ export default function ModalAgregarBoletos({
 
   const [mostrarOcultarBtn, setMostrarOcultarBtn] = useState<boolean>(false);
 
+  const [disables, setDisables] = useState<CamposI>({
+    disNombre: false,
+    disNumero: false,
+    disEstado: false,
+    disLocalidad: false,
+    disDomicilio: false,
+    disCP: false,
+    disArchivo: false,
+  });
+
   useEffect(() => {
     if (show && boletos.length) {
       setBoletosUsuario(boletos);
@@ -82,6 +105,8 @@ export default function ModalAgregarBoletos({
       setAlerta(<></>);
       setTituloModal("Apartar Boletos");
       setMostrarOcultarBtn(false);
+      resetearCampos(false);
+      setArchivoSubido(false);
     }
   }, [show]);
 
@@ -171,6 +196,7 @@ export default function ModalAgregarBoletos({
                     type="text"
                     placeholder="Nombre completo"
                     className="w-100 border-0 rounded-end-2 px-1 py-1 icon-color"
+                    disabled={disables.disNombre}
                     value={nombre}
                     onChange={(e) => {
                       setNombre(e.target.value);
@@ -190,6 +216,7 @@ export default function ModalAgregarBoletos({
                     placeholder="Número de teléfono"
                     className="w-100 border-0 rounded-end-2 px-1 py-1 icon-color"
                     pattern="[0-9]*"
+                    disabled={disables.disNumero}
                     value={numTelefono}
                     onChange={(e) => {
                       setNumTelefono(handleChangeNumero(e.target.value));
@@ -205,6 +232,7 @@ export default function ModalAgregarBoletos({
                   </span>
                   <select
                     className="w-100 border-0 rounded-end-2 px-1 py-1 icon-color"
+                    disabled={disables.disEstado}
                     value={estado}
                     onChange={(e) => {
                       setEstado(e.target.value);
@@ -231,6 +259,7 @@ export default function ModalAgregarBoletos({
                   </span>
                   <select
                     className="w-100 border-0 rounded-end-2 px-1 py-1 icon-color"
+                    disabled={disables.disLocalidad}
                     value={localidad}
                     onChange={(e) => {
                       handleSeleccionaLocalidad(e.target.value);
@@ -257,6 +286,7 @@ export default function ModalAgregarBoletos({
                     type="text"
                     placeholder="Calle y número"
                     className="w-100 border-0 rounded-end-2 px-1 py-1 icon-color"
+                    disabled={disables.disDomicilio}
                     value={domicilio}
                     onChange={(e) => {
                       setDomicilio(e.target.value);
@@ -277,6 +307,7 @@ export default function ModalAgregarBoletos({
                     type="text"
                     placeholder="Código postal"
                     className="w-100 border-0 rounded-end-2 px-1 py-1 icon-color"
+                    disabled={disables.disCP}
                     value={codigoPostal}
                     onChange={(e) => {
                       setCodigoPostal(handleChangeNumero(e.target.value));
@@ -293,6 +324,7 @@ export default function ModalAgregarBoletos({
                   </span>
                 </div>
                 <InputFile
+                  disabled={disables.disArchivo}
                   extensiones=".pdf, .jpg, .png, .jpeg"
                   multiple={false}
                   onFormDataReady={handleSubirArchivo}
@@ -337,6 +369,7 @@ export default function ModalAgregarBoletos({
     alerta,
     mostrarOcultarBtn,
     archivoSubido,
+    disables,
   ]);
 
   const handleChangeNumero = (numero: any) => {
@@ -345,17 +378,6 @@ export default function ModalAgregarBoletos({
   };
 
   const handleGuardarDatos = () => {
-    const datos = {
-      nombre,
-      numTelefono,
-      estado,
-      localidad,
-      domicilio,
-      codigoPostal,
-      archivoSubido,
-    };
-    console.log(datos);
-
     if (
       nombre !== "" &&
       numTelefono !== "" &&
@@ -373,6 +395,7 @@ export default function ModalAgregarBoletos({
         domicilio,
         codigoPostal,
         boletosUsuario,
+        pagoTotal,
       };
 
       Swal.fire({
@@ -406,15 +429,18 @@ export default function ModalAgregarBoletos({
       const response = await postData("guardarDatosRifa", datos);
       const { status, data } = response;
       if (status === 200) {
+        resetearCampos(true);
         setAlerta(
           <Alerta
             clases="alerta-success"
             header=""
             body={`Tus datos han sido guardados exitosamente. <br/> 
+              Te debe llegar un mensaje a tu whatsapp con la información agregada recientemente. <br/>
               Presiona el botón "Métodos de Pago" para ver todas las cuentas donde puedes realizar las transferencias por el monto correspondiente.`}
           />
         );
         setMostrarOcultarBtn(true);
+        datosGuardados();
       }
     } catch (error: any) {
       if (error.response) {
@@ -443,10 +469,24 @@ export default function ModalAgregarBoletos({
     setContenido(<ModalMetodosdePago />);
   }
 
+  function resetearCampos(valor: boolean) {
+    setDisables({
+      disNombre: valor,
+      disNumero: valor,
+      disEstado: valor,
+      disLocalidad: valor,
+      disDomicilio: valor,
+      disCP: valor,
+      disArchivo: valor,
+    });
+  }
+
   return (
     <Modal
       show={show}
-      onHide={handleClose}
+      onHide={() => {
+        handleClose();
+      }}
       keyboard={false}
       centered
       className="modal-lg"
@@ -462,7 +502,9 @@ export default function ModalAgregarBoletos({
       <Modal.Footer>
         <button
           className="btn-bancos rounded-4 mt-2 py-1 px-2 outline-none m-auto"
-          onClick={() => handleClose()}
+          onClick={() => {
+            handleClose();
+          }}
         >
           Cerrar
         </button>

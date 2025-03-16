@@ -17,7 +17,6 @@ interface ProductoResponseI {
 }
 
 export default function Boletos() {
-
   const [carga, setCarga] = useState<boolean>(false);
 
   const [idProducto, setIdProducto] = useState<number | null>(null);
@@ -55,7 +54,7 @@ export default function Boletos() {
       );
       const { status, data } = response;
       //console.log(status);
-      //console.log(data);
+      console.log(data);
       if (status === 204) {
       }
       if (status === 200) {
@@ -126,6 +125,18 @@ export default function Boletos() {
     );
     setShowAddBoletos(existeActivo);
   }, [propiedades]);
+
+  const handleRenderizarBoletos = () => {
+    setCarga(false);
+    setIdProducto(null);
+    setPrecioBoleto(null);
+    setRangoInicialBoletos(null);
+    setRangoFinalBoletos(null);
+    setShowAddBoletos(false);
+    setPropiedades({});
+    setBoletosSeleccionados([]);
+    extraerProductoRifado();
+  };
 
   return (
     <div>
@@ -202,6 +213,7 @@ export default function Boletos() {
         handleClose={handleClose}
         boletos={boletosSeleccionados}
         precioBoleto={precioBoleto}
+        datosGuardados={handleRenderizarBoletos}
       />
     </div>
   );

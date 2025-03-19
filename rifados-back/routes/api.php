@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/guardarNuevoBanco', 'guardarNuevoBanco');
         Route::post('/actualizarBanco', 'actualizarBanco');
         Route::post('/eliminarBanco', 'eliminarBanco');
+        Route::get('/extraerCuentasBancarias', 'extraerCuentasBancarias');
         //Route::get('/usuariosBancoSeleccionado', 'usuariosBancoSeleccionado');
     });
 });

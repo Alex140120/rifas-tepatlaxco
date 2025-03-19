@@ -215,4 +215,27 @@ class AdministradoresController extends Controller
             return response()->json(['error' => $th->getMessage()], 500);
         }
     }
+
+    public function extraerCuentasBancarias(Request $request)
+    {
+        try {
+
+            $cuentas = DB::table('cuentas_bancarias as ta')
+                ->join('bancos as tb', 'tb.id', '=', 'ta.banco')
+                ->join('usuarios as tc', 'tc.id', '=', 'ta.id_titular')
+                ->select(
+                    'ta.id',
+                    'ta.clabe',
+                    'ta.no_tarjeta',
+                    'tb.logo_banco',
+                    'tb.nombre_banco',
+                    DB::raw("CONCAT(tc.nombres, ' ', tc.apellido_p, ' ', tc.apellido_m) as titular")
+                )
+                ->get();
+
+            return response()->json(['cuentas' => $cuentas], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
 }

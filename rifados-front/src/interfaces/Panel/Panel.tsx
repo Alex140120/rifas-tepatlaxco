@@ -6,6 +6,7 @@ import instance from "../../api/axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAdd,
+  faCreditCard,
   faList,
   faPowerOff,
   faUniversity,
@@ -99,6 +100,13 @@ export default function Panel() {
           >
             <FontAwesomeIcon icon={faUniversity} />
             <span className="text-button ms-2">Bancos Registrados</span>
+          </button>
+          <button
+            className="btn-aside w-100 p-2 outline-none rounded-0"
+            onClick={() => ActualizarMain("cuentasBancarias")}
+          >
+            <FontAwesomeIcon icon={faCreditCard} />
+            <span className="text-button ms-2">Cuentas Bancarias</span>
           </button>
         </aside>
         <div className="principal p-3">

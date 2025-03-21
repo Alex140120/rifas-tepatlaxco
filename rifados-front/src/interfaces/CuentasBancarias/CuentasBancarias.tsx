@@ -6,6 +6,7 @@ import Spinner from "../../components/Tags/Spinner";
 import { OverlayTrigger, ToastContainer, Tooltip } from "react-bootstrap";
 import { notifyError } from "../../components/Alertas/Alertas";
 import { getData } from "../../api/apiRequest";
+import ModalAddUpdateAccount from "./Complementos/ModalAddUpdateAccount";
 
 interface ColumnasI {
   field: string | number | boolean;
@@ -39,45 +40,49 @@ export default function CuentasBancarias() {
 
   const [filas, setFilas] = useState<FilasI[]>([]);
 
-  const [showUsersBank, setShowUsersBank] = useState<boolean>(false);
-  const handleShowUsersBank = () => setShowUsersBank(true);
-  const handleCloseUsersBank = () => {
-    setShowUsersBank(false);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const handleShowModal = () => setShowModal(true);
+  const handleCloseModal = () => {
+    setShowModal(false);
   };
+
+  const [tipoTransaccion, setTipoTransaccion] = useState<string | null>(null);
+  const [datosCuenta, setDatosCuenta] = useState<FilasI | null>(null);
 
   // Carga Inicial
   useEffect(() => {
-    const extraerCuentasBancarias = async () => {
-      try {
-        const response = await getData<ResponseI>(
-          "extraerCuentasBancarias",
-          null
-        );
-        const { status, data } = response;
-        if (status === 200) {
-          setFilas(data.cuentas);
-        }
-      } catch (error: any) {
-        if (error.response) {
-          notifyError(
-            "No se pudo extraer la información, intente más tarde.",
-            "top-center"
-          );
-          // obtener el status y los datos de la respuesta
-          const { status, data } = error.response;
-          console.log(
-            `status: ${status} | error: ${data.error} | message: ${data.message}`
-          );
-        } else {
-          // Si no hay `response` (error de red u otro problema)
-          console.log("Error de red o configuración:", error.message);
-        }
-      } finally {
-        setCarga(true);
-      }
-    };
     extraerCuentasBancarias();
   }, []);
+
+  const extraerCuentasBancarias = async () => {
+    try {
+      const response = await getData<ResponseI>(
+        "extraerCuentasBancarias",
+        null
+      );
+      const { status, data } = response;
+      if (status === 200) {
+        setFilas(data.cuentas);
+      }
+    } catch (error: any) {
+      if (error.response) {
+        notifyError(
+          "No se pudo extraer la información, intente más tarde.",
+          "top-center"
+        );
+        // obtener el status y los datos de la respuesta
+        const { status, data } = error.response;
+        console.log(
+          `status: ${status} | error: ${data.error} | message: ${data.message}`
+        );
+      } else {
+        // Si no hay `response` (error de red u otro problema)
+        console.log("Error de red o configuración:", error.message);
+      }
+    } finally {
+      setCarga(true);
+    }
+  };
 
   const renderColumnContent = (field: string, rowData: FilasI) => {
     if (field === "nombre_banco") {
@@ -128,6 +133,10 @@ export default function CuentasBancarias() {
     }
   };
 
+  const handleActualizarCuentas = () => {
+    extraerCuentasBancarias();
+  };
+
   return (
     <div className="container-modulo px-3 py-2 rounded-3">
       <h2>Cuentas Bancarias</h2>
@@ -136,9 +145,9 @@ export default function CuentasBancarias() {
       <button
         className="mb-3 rounded-2 border btn-primary-rifas text-light t3 px-2 py-1"
         onClick={() => {
-          // handleShowNewBank();
-          // setTipoTransaccion("new");
-          // setDatosBanco(null);
+          setTipoTransaccion("Agregar");
+          handleShowModal();
+          setDatosCuenta(null);
         }}
       >
         <FontAwesomeIcon icon={faAdd} className="me-2" />
@@ -160,6 +169,14 @@ export default function CuentasBancarias() {
       )}
 
       <ToastContainer />
+
+      <ModalAddUpdateAccount
+        show={showModal}
+        handleClose={handleCloseModal}
+        tituloModal={tipoTransaccion}
+        datosCuenta={datosCuenta}
+        actualizarCuentas={handleActualizarCuentas}
+      />
     </div>
   );
 }

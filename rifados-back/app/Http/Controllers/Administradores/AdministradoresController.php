@@ -238,4 +238,61 @@ class AdministradoresController extends Controller
             return response()->json(['error' => $th->getMessage()], 500);
         }
     }
+
+    public function usuariosBancosRegistrados()
+    {
+        try {
+
+            $bancos = DB::table('bancos')
+                ->select(
+                    'id',
+                    'nombre_banco AS opcion',
+                    DB::raw("FALSE AS disabled")
+                )
+                ->orderBy('opcion', 'ASC')
+                ->get();
+
+            $usuarios = DB::table('usuarios')
+                ->select(
+                    'id',
+                    DB::raw("CONCAT (nombres, ' ', apellido_p, ' ', apellido_m) AS opcion"),
+                    DB::raw("FALSE AS disabled")
+                )
+                ->orderBy('opcion', 'ASC')
+                ->get();
+
+            return response()->json(['bancos' => $bancos, 'usuarios' => $usuarios], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function guardarNuevaCuentaBancaria(Request $request)
+    {
+        try {
+
+            $params = $request->validate([
+                'clabe'     => 'required|string',
+                'tarjeta'   => 'required|string',
+                'banco'     => 'required|int',
+                'titular'   => 'required|int',
+            ]);
+
+            $clabe = $params['clabe'];
+            $tarjeta = $params['tarjeta'];
+            $banco = $params['banco'];
+            $titular = $params['titular'];
+
+            $registro = DB::table('cuentas_bancarias')->insert([
+                'clabe' => $clabe,
+                'no_tarjeta' => $tarjeta,
+                'id_titular' => $titular,
+                'banco' => $banco
+            ]);
+
+            return response()->json(['output' => $registro], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
 }

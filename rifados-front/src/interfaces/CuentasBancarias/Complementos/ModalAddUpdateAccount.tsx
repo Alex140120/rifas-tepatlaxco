@@ -14,10 +14,12 @@ import Alerta from "../../../components/Alertas/Alerta";
 import Swal from "sweetalert2";
 
 interface FilasI {
-  id: number;
+  idcuenta: number;
+  idtitular: number;
   titular: string;
   clabe: string;
   no_tarjeta: string;
+  idbanco: number;
   nombre_banco: string;
   logo_banco: string;
   [key: string]: any; // Firma de índice añadida
@@ -46,6 +48,7 @@ export default function ModalAddUpdateAccount({
   show,
   handleClose,
   tituloModal,
+  datosCuenta,
   actualizarCuentas,
 }: Props) {
   const [carga, setCarga] = useState<boolean>(false);
@@ -61,73 +64,92 @@ export default function ModalAddUpdateAccount({
   const [titular, setTitular] = useState<string | number>("");
 
   const [alerta, setAlerta] = useState<boolean>(false);
+  const [bodyAlerta, setBodyAlerta] = useState<string>("");
 
   useEffect(() => {
     if (show) {
-      const extraerDatos = async () => {
-        try {
-          const response = await getData<ResponseGetI>(
-            "usuariosBancosRegistrados",
-            null
-          );
-          const { status, data } = response;
-          if (status === 200) {
-            setTitulares(data.usuarios);
-            setBancosRegistrados(data.bancos);
-          }
-        } catch (error: any) {
-          if (error.response) {
-            notifyError("Algo ha salido mal, verifique.", "top-center");
-            // obtener el status y los datos de la respuesta
-            const { status, data } = error.response;
-            console.log(
-              `status: ${status} | error: ${data.error} | message: ${data.message}`
-            );
-          } else {
-            // Si no hay `response` (error de red u otro problema)
-            console.log("Error de red o configuración:", error.message);
-          }
-        } finally {
-          setCarga(true);
-        }
-      };
       extraerDatos();
+      if (tituloModal === "Modificar") {
+        if (datosCuenta !== null) {
+          setClabe(datosCuenta.clabe);
+          setTarjeta(datosCuenta.no_tarjeta);
+          setBanco(datosCuenta.idbanco);
+          setTitular(datosCuenta.idtitular);
+        }
+      }
     } else {
       setCarga(false);
       limpiarCampos();
     }
   }, [show]);
 
+  const extraerDatos = async () => {
+    try {
+      const response = await getData<ResponseGetI>(
+        "usuariosBancosRegistrados",
+        null
+      );
+      const { status, data } = response;
+      if (status === 200) {
+        setTitulares(data.usuarios);
+        setBancosRegistrados(data.bancos);
+      }
+    } catch (error: any) {
+      if (error.response) {
+        notifyError("Algo ha salido mal, verifique.", "top-center");
+        // obtener el status y los datos de la respuesta
+        const { status, data } = error.response;
+        console.log(
+          `status: ${status} | error: ${data.error} | message: ${data.message}`
+        );
+      } else {
+        // Si no hay `response` (error de red u otro problema)
+        console.log("Error de red o configuración:", error.message);
+      }
+    } finally {
+      setCarga(true);
+    }
+  };
+
   const guardarCuenta = () => {
-    if (
-      clabe === "" ||
-      clabe === null ||
-      tarjeta === "" ||
-      tarjeta === null ||
-      banco === "" ||
-      banco === null ||
-      titular === "" ||
-      titular === null
-    ) {
+    if (banco === "" || banco === null || titular === "" || titular === null) {
+      setBodyAlerta("Favor de llenar todos los campos.");
       setAlerta(true);
       return null;
     }
 
-    Swal.fire({
-      title: "Verifique",
-      text: "¿Está seguro que la información proporcionada es la correcta?",
-      icon: "warning",
-      showCancelButton: true,
-      cancelButtonColor: "#d33",
-      cancelButtonText: "Cancelar",
-      confirmButtonColor: "#05C7A7",
-      confirmButtonText: "Sí, es correcto",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const datos = { clabe, tarjeta, banco, titular };
-        ejecutarGuardadoCuenta(datos);
-      }
-    });
+    if ((clabe !== "" && tarjeta === "") || (clabe === "" && tarjeta !== "")) {
+      Swal.fire({
+        title: "Verifique",
+        text: "¿Está seguro que la información proporcionada es la correcta?",
+        icon: "warning",
+        showCancelButton: true,
+        cancelButtonColor: "#d33",
+        cancelButtonText: "Cancelar",
+        confirmButtonColor: "#05C7A7",
+        confirmButtonText: "Sí, es correcto",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          if (tituloModal === "Agregar") {
+            const datos = { clabe, tarjeta, banco, titular };
+            ejecutarGuardadoCuenta(datos);
+          } else {
+            const datos = {
+              idcuenta: datosCuenta?.idcuenta,
+              clabe,
+              tarjeta,
+              banco,
+              titular,
+            };
+            ejecutarModificacionCuenta(datos);
+          }
+        }
+      });
+    } else {
+      setBodyAlerta("Debe agregar la CLABE o el NÚMERO DE TARJETA, si desea agregar ambos es posible.");
+      setAlerta(true);
+      return null;
+    }
   };
 
   const ejecutarGuardadoCuenta = async (datos: object) => {
@@ -156,6 +178,35 @@ export default function ModalAddUpdateAccount({
     }
   };
 
+  const ejecutarModificacionCuenta = async (datos: object) => {
+    try {
+      const response = await postData("modificarCuentaBancaria", datos);
+      const { status } = response;
+      if (status === 200) {
+        actualizarCuentas();
+        notifySuccess("¡Cuenta modificada!", "top-center");
+        setTimeout(() => {
+          handleClose();
+        }, 250);
+      }
+    } catch (error: any) {
+      if (error.response) {
+        notifyError(
+          "No se pudo actualizar, inténtelo más tarde.",
+          "top-center"
+        );
+        // obtener el status y los datos de la respuesta
+        const { status, data } = error.response;
+        console.log(
+          `status: ${status} | error: ${data.error} | message: ${data.message}`
+        );
+      } else {
+        // Si no hay `response` (error de red u otro problema)
+        console.log("Error de red o configuración:", error.message);
+      }
+    }
+  };
+
   function limpiarCampos() {
     setClabe("");
     setTarjeta("");
@@ -163,6 +214,7 @@ export default function ModalAddUpdateAccount({
     setBanco("");
     setTitulares([]);
     setTitular("");
+    setBodyAlerta("");
   }
 
   return (
@@ -245,7 +297,7 @@ export default function ModalAddUpdateAccount({
                       <Alerta
                         clases="alerta-danger"
                         header="¡ERROR!"
-                        body="Favor de llenar todos los campos."
+                        body={bodyAlerta}
                       />
                     </div>
                   ) : null}

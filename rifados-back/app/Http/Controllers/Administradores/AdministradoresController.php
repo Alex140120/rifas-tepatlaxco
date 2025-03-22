@@ -224,11 +224,13 @@ class AdministradoresController extends Controller
                 ->join('bancos as tb', 'tb.id', '=', 'ta.banco')
                 ->join('usuarios as tc', 'tc.id', '=', 'ta.id_titular')
                 ->select(
-                    'ta.id',
+                    'ta.id AS idcuenta',
                     'ta.clabe',
                     'ta.no_tarjeta',
+                    'tb.id AS idbanco',
                     'tb.logo_banco',
                     'tb.nombre_banco',
+                    'tc.id AS idtitular',
                     DB::raw("CONCAT(tc.nombres, ' ', tc.apellido_p, ' ', tc.apellido_m) as titular")
                 )
                 ->get();
@@ -272,14 +274,12 @@ class AdministradoresController extends Controller
         try {
 
             $params = $request->validate([
-                'clabe'     => 'required|string',
-                'tarjeta'   => 'required|string',
                 'banco'     => 'required|int',
                 'titular'   => 'required|int',
             ]);
 
-            $clabe = $params['clabe'];
-            $tarjeta = $params['tarjeta'];
+            $clabe = $request->clabe;
+            $tarjeta = $request->tarjeta;
             $banco = $params['banco'];
             $titular = $params['titular'];
 
@@ -291,6 +291,56 @@ class AdministradoresController extends Controller
             ]);
 
             return response()->json(['output' => $registro], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function modificarCuentaBancaria(Request $request)
+    {
+        try {
+
+            $params = $request->validate([
+                'idcuenta'  => 'required|int',
+                'banco'     => 'required|int',
+                'titular'   => 'required|int',
+            ]);
+
+            $idcuenta = $params['idcuenta'];
+            $clabe = $request->clabe;
+            $tarjeta = $request->tarjeta;
+            $banco = $params['banco'];
+            $titular = $params['titular'];
+
+
+            $update = DB::table('cuentas_bancarias')
+                ->where('id', $idcuenta)
+                ->update([
+                    'clabe'         => $clabe,
+                    'no_tarjeta'    => $tarjeta,
+                    'id_titular'    => $titular,
+                    'banco'         => $banco
+                ]);
+
+            return response()->json(['output' => $update], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function eliminarCuentaBancaria(Request $request)
+    {
+        $param = $request->validate([
+            'idcuenta' => 'required|int'
+        ]);
+
+        $idcuenta = $param['idcuenta'];
+
+        try {
+
+            DB::table('cuentas_bancarias')->where('id', $idcuenta)->delete();
+
+            return response()->json(['output' => true], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }

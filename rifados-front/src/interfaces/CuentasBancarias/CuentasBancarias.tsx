@@ -5,8 +5,9 @@ import Tabla from "../../components/Tables/Tabla";
 import Spinner from "../../components/Tags/Spinner";
 import { OverlayTrigger, ToastContainer, Tooltip } from "react-bootstrap";
 import { notifyError } from "../../components/Alertas/Alertas";
-import { getData } from "../../api/apiRequest";
+import { getData, postData } from "../../api/apiRequest";
 import ModalAddUpdateAccount from "./Complementos/ModalAddUpdateAccount";
+import Swal from "sweetalert2";
 
 interface ColumnasI {
   field: string | number | boolean;
@@ -14,10 +15,12 @@ interface ColumnasI {
 }
 
 interface FilasI {
-  id: number;
+  idcuenta: number;
+  idtitular: number;
   titular: string;
   clabe: string;
   no_tarjeta: string;
+  idbanco: number;
   nombre_banco: string;
   logo_banco: string;
   [key: string]: any; // Firma de índice añadida
@@ -108,7 +111,11 @@ export default function CuentasBancarias() {
             >
               <button
                 className="btn-warning-rifas text-light rounded-1 t4 px-1 ms-2 outline-none"
-                onClick={() => {}}
+                onClick={() => {
+                  setTipoTransaccion("Modificar");
+                  handleShowModal();
+                  setDatosCuenta(rowData);
+                }}
               >
                 <FontAwesomeIcon icon={faPencil} />
               </button>
@@ -120,7 +127,9 @@ export default function CuentasBancarias() {
             >
               <button
                 className={`t3 rounded-1 btn-danger-rifas text-light t4 ms-2`}
-                onClick={() => {}}
+                onClick={() => {
+                  handleEliminarCuenta(rowData.idcuenta);
+                }}
               >
                 <FontAwesomeIcon icon={faTimes} />
               </button>
@@ -135,6 +144,48 @@ export default function CuentasBancarias() {
 
   const handleActualizarCuentas = () => {
     extraerCuentasBancarias();
+  };
+
+  const handleEliminarCuenta = (idcuenta: number) => {
+    Swal.fire({
+      title: "",
+      text: "¿Está seguro de eliminar la cuenta bancaria seleccionada?",
+      icon: "warning",
+      showCancelButton: true,
+      cancelButtonColor: "#d33",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#05C7A7",
+      confirmButtonText: "Sí, eliminar.",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        eliminarCuenta(idcuenta);
+      }
+    });
+  };
+
+  const eliminarCuenta = async (idcuenta: number) => {
+    try {
+      const response = await postData("eliminarCuentaBancaria", { idcuenta });
+      const { status } = response;
+      if (status === 200) {
+        const nuevasCuentas = filas.filter(
+          (item) => item.idcuenta !== idcuenta
+        );
+        setFilas(nuevasCuentas);
+      }
+    } catch (error: any) {
+      if (error.response) {
+        notifyError("No se pudo eliminar, inténtelo más tarde.", "top-center");
+        // obtener el status y los datos de la respuesta
+        const { status, data } = error.response;
+        console.log(
+          `status: ${status} | error: ${data.error} | message: ${data.message}`
+        );
+      } else {
+        // Si no hay `response` (error de red u otro problema)
+        console.log("Error de red o configuración:", error.message);
+      }
+    }
   };
 
   return (

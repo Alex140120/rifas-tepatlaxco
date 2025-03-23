@@ -78,6 +78,7 @@ export default function ModalAddUpdateAccount({
         }
       }
     } else {
+      setAlerta(false);
       setCarga(false);
       limpiarCampos();
     }
@@ -118,7 +119,7 @@ export default function ModalAddUpdateAccount({
       return null;
     }
 
-    if ((clabe !== "" && tarjeta === "") || (clabe === "" && tarjeta !== "")) {
+    if ((clabe !== "" && tarjeta === "") || (clabe === "" && tarjeta !== "") || (clabe !== "" && tarjeta !== "")) {
       Swal.fire({
         title: "Verifique",
         text: "¿Está seguro que la información proporcionada es la correcta?",
@@ -146,7 +147,9 @@ export default function ModalAddUpdateAccount({
         }
       });
     } else {
-      setBodyAlerta("Debe agregar la CLABE o el NÚMERO DE TARJETA, si desea agregar ambos es posible.");
+      setBodyAlerta(
+        "Debe agregar la CLABE o el NÚMERO DE TARJETA, si desea agregar ambos es posible."
+      );
       setAlerta(true);
       return null;
     }

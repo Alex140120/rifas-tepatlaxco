@@ -30,7 +30,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/guardarNuevaCuentaBancaria', 'guardarNuevaCuentaBancaria');
         Route::post('/modificarCuentaBancaria', 'modificarCuentaBancaria');
         Route::post('/eliminarCuentaBancaria', 'eliminarCuentaBancaria');
-        //Route::get('/usuariosBancoSeleccionado', 'usuariosBancoSeleccionado');
+        Route::get('/usuariosRegistrados', 'usuariosRegistrados');
+        Route::post('/agregarNuevoUsuario', 'agregarNuevoUsuario');
+        Route::post('/modificarUsuario', 'modificarUsuario');
+        Route::post('/eliminarUsuario', 'eliminarUsuario');
     });
 });
 

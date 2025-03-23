@@ -233,6 +233,7 @@ class AdministradoresController extends Controller
                     'tc.id AS idtitular',
                     DB::raw("CONCAT(tc.nombres, ' ', tc.apellido_p, ' ', tc.apellido_m) as titular")
                 )
+                ->orderBy('titular', 'ASC')
                 ->get();
 
             return response()->json(['cuentas' => $cuentas], 200);
@@ -339,6 +340,118 @@ class AdministradoresController extends Controller
         try {
 
             DB::table('cuentas_bancarias')->where('id', $idcuenta)->delete();
+
+            return response()->json(['output' => true], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function usuariosRegistrados()
+    {
+        try {
+
+            $usuarios = DB::table('usuarios')
+                ->orderBy('nombres', 'ASC')
+                ->get();
+
+            return response()->json(['usuarios' => $usuarios], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function agregarNuevoUsuario(Request $request)
+    {
+        try {
+            $params = $request->validate([
+                'usuariocorreo'         => 'required|string',
+                'password'              => 'required|string',
+                'nombres'               => 'required|string',
+                'apellido_p'            => 'required|string',
+                'apellido_m'            => 'required|string',
+                'telefono'              => 'required|string',
+                'correo'                => 'required|string',
+                'nombre_bancario'       => 'required|string',
+            ]);
+
+            extract($params);
+
+            $existeUsuario = DB::table('usuarios')->where('usuariocorreo', $usuariocorreo)->exists();
+
+            if (!$existeUsuario) {
+                $idNuevo = DB::table('usuarios')->insertGetId([
+                    'usuariocorreo'     => $usuariocorreo,
+                    'password'          => $password,
+                    'nombres'           => $nombres,
+                    'apellido_p'        => $apellido_p,
+                    'apellido_m'        => $apellido_m,
+                    'telefono'          => $telefono,
+                    'correo'            => $correo,
+                    'nombre_bancario'   => $nombre_bancario,
+                ]);
+
+                return response()->json(['user' => $idNuevo], 200);
+            } else {
+                return response()->json(['output' => false], 409);
+            }
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function modificarUsuario(Request $request)
+    {
+        try {
+            $params = $request->validate([
+                'idusuario'             => 'required|int',
+                'usuariocorreo'         => 'required|string',
+                'password'              => 'required|string',
+                'nombres'               => 'required|string',
+                'apellido_p'            => 'required|string',
+                'apellido_m'            => 'required|string',
+                'telefono'              => 'required|string',
+                'correo'                => 'required|string',
+                'nombre_bancario'       => 'required|string',
+            ]);
+
+            extract($params);
+
+            $update = DB::table('usuarios')
+                ->where('id', $idusuario)
+                ->update([
+                    'usuariocorreo'     => $usuariocorreo,
+                    'password'          => $password,
+                    'nombres'           => $nombres,
+                    'apellido_p'        => $apellido_p,
+                    'apellido_m'        => $apellido_m,
+                    'telefono'          => $telefono,
+                    'correo'            => $correo,
+                    'nombre_bancario'   => $nombre_bancario,
+                ]);
+
+            return response()->json(['output' => $update], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function eliminarUsuario(Request $request)
+    {
+        $param = $request->validate([
+            'idusuario' => 'required|int'
+        ]);
+
+        try {
+
+            $idusuario = $param['idusuario'];
+
+            DB::transaction(function () use ($idusuario) {
+                // Elimina el usuario
+                DB::table('usuarios')->where('id', $idusuario)->delete();
+                // elimina las cuentas bancarias del usuario
+                DB::table('cuentas_bancarias')->where('id_titular', $idusuario)->delete();
+            });
 
             return response()->json(['output' => true], 200);
         } catch (\Throwable $th) {

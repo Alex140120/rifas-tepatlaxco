@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Tabla from "../../components/Tables/Tabla";
 import Spinner from "../../components/Tags/Spinner";
 import { OverlayTrigger, ToastContainer, Tooltip } from "react-bootstrap";
-import { notifyError } from "../../components/Alertas/Alertas";
+import { notifyError, notifySuccess } from "../../components/Alertas/Alertas";
 import { getData, postData } from "../../api/apiRequest";
 import ModalAddUpdateAccount from "./Complementos/ModalAddUpdateAccount";
 import Swal from "sweetalert2";
@@ -104,13 +104,13 @@ export default function CuentasBancarias() {
     } else if (field === "acciones") {
       return (
         <>
-          <div className="w-100 d-flex">
+          <div className="w-100 d-flex justify-content-center">
             <OverlayTrigger
               placement="top"
               overlay={<Tooltip>Modificar</Tooltip>}
             >
               <button
-                className="btn-warning-rifas text-light rounded-1 t4 px-1 ms-2 outline-none"
+                className="btn-edit border rounded-1 t4 me-1"
                 onClick={() => {
                   setTipoTransaccion("Modificar");
                   handleShowModal();
@@ -126,7 +126,7 @@ export default function CuentasBancarias() {
               overlay={<Tooltip>Eliminar</Tooltip>}
             >
               <button
-                className={`t3 rounded-1 btn-danger-rifas text-light t4 ms-2`}
+                className={`btn-delete border rounded-1 t4`}
                 onClick={() => {
                   handleEliminarCuenta(rowData.idcuenta);
                 }}
@@ -168,6 +168,7 @@ export default function CuentasBancarias() {
       const response = await postData("eliminarCuentaBancaria", { idcuenta });
       const { status } = response;
       if (status === 200) {
+        notifySuccess("¡Cuenta eliminada!", "top-center");
         const nuevasCuentas = filas.filter(
           (item) => item.idcuenta !== idcuenta
         );

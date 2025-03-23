@@ -597,7 +597,8 @@ textarea {
 }
 
 .btn-delete,
-.btn-edit {
+.btn-edit,
+.btn-users {
   color: #868686;
 }
 
@@ -608,6 +609,11 @@ textarea {
 
 .btn-delete:hover {
   background-color: #e22f2f;
+  color: #fff;
+}
+
+.btn-users:hover {
+  background-color: #e7a851;
   color: #fff;
 }
 

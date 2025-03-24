@@ -37,7 +37,7 @@ class ProductosRifadosController extends Controller
         $precioBoleto = $params['precioBoleto'];
         $rangoInicial = $params['rangoInicial'];
         $rangoFinal = $params['rangoFinal'];
-
+        
         $id_usuario = $this->userAuth->id;
         $status_enRifa = 0;
         $tamano_Permitido = 5242880;

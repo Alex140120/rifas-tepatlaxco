@@ -404,7 +404,7 @@ class AdministradoresController extends Controller
     {
         try {
             $params = $request->validate([
-                'idusuario'             => 'required|int',
+                'idUsuario'             => 'required|int',
                 'usuariocorreo'         => 'required|string',
                 'password'              => 'required|string',
                 'nombres'               => 'required|string',
@@ -417,20 +417,26 @@ class AdministradoresController extends Controller
 
             extract($params);
 
-            $update = DB::table('usuarios')
-                ->where('id', $idusuario)
-                ->update([
-                    'usuariocorreo'     => $usuariocorreo,
-                    'password'          => $password,
-                    'nombres'           => $nombres,
-                    'apellido_p'        => $apellido_p,
-                    'apellido_m'        => $apellido_m,
-                    'telefono'          => $telefono,
-                    'correo'            => $correo,
-                    'nombre_bancario'   => $nombre_bancario,
-                ]);
+            $existeUsuario = DB::table('usuarios')->where('usuariocorreo', $usuariocorreo)->exists();
 
-            return response()->json(['output' => $update], 200);
+            if (!$existeUsuario) {
+                $update = DB::table('usuarios')
+                    ->where('id', $idUsuario)
+                    ->update([
+                        'usuariocorreo'     => $usuariocorreo,
+                        'password'          => $password,
+                        'nombres'           => $nombres,
+                        'apellido_p'        => $apellido_p,
+                        'apellido_m'        => $apellido_m,
+                        'telefono'          => $telefono,
+                        'correo'            => $correo,
+                        'nombre_bancario'   => $nombre_bancario,
+                    ]);
+
+                return response()->json(['output' => $update], 200);
+            } else {
+                return response()->json(['output' => false], 409);
+            }
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }

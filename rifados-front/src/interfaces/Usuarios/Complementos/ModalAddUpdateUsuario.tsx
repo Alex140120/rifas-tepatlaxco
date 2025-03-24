@@ -11,11 +11,25 @@ import {
   notifySuccess,
 } from "../../../components/Alertas/Alertas";
 
+interface FilasI {
+  id: number;
+  usuariocorreo: string;
+  password: string;
+  nombres: string;
+  apellido_p: string;
+  apellido_m: string;
+  telefono: string;
+  correo: string;
+  nombre_bancario: string;
+  [key: string]: any; // Firma de índice añadida
+}
+
 interface Props {
   show: boolean;
   handleClose: () => void;
   tituloModal: string;
   actualizarRegistros: () => void;
+  datosUsuario: FilasI | null;
 }
 
 export default function ModalAddUpdateUsuario({
@@ -23,9 +37,11 @@ export default function ModalAddUpdateUsuario({
   handleClose,
   tituloModal,
   actualizarRegistros,
+  datosUsuario,
 }: Props) {
   const [carga, setCarga] = useState<boolean>(false);
 
+  const [idUsuario, setIdUsuario] = useState<number | null>(null);
   const [nombres, setNombres] = useState<string>("");
   const [apellidoP, setApellidoP] = useState<string>("");
   const [apellidoM, setApellidoM] = useState<string>("");
@@ -42,6 +58,19 @@ export default function ModalAddUpdateUsuario({
     if (show) {
       if (tituloModal === "Agregar") {
         setCarga(true);
+      } else if (tituloModal === "Modificar") {
+        if (datosUsuario !== null) {
+          setIdUsuario(datosUsuario.id);
+          setNombres(datosUsuario.nombres);
+          setApellidoP(datosUsuario.apellido_p);
+          setApellidoM(datosUsuario.apellido_m);
+          setCorreo(datosUsuario.correo);
+          setUserName(datosUsuario.usuariocorreo);
+          setPassword(datosUsuario.password);
+          setTelefono(datosUsuario.telefono);
+          setNombreBancario(datosUsuario.nombre_bancario);
+          setCarga(true);
+        }
       }
     } else {
       setCarga(false);
@@ -49,7 +78,7 @@ export default function ModalAddUpdateUsuario({
     }
   }, [show]);
 
-  const handleGuardarUsuario = async () => {
+  const handleGuardarUsuario = () => {
     if (
       nombres === "" ||
       apellidoP === "" ||
@@ -65,6 +94,7 @@ export default function ModalAddUpdateUsuario({
     }
 
     const datos = {
+      idUsuario,
       nombres,
       apellido_p: apellidoP,
       apellido_m: apellidoM,
@@ -75,6 +105,14 @@ export default function ModalAddUpdateUsuario({
       nombre_bancario: nombreBancario,
     };
 
+    if (tituloModal === "Agregar") {
+      agregarNuevoUsuario(datos);
+    } else if (tituloModal === "Modificar") {
+      modificarUsuario(datos);
+    }
+  };
+
+  const agregarNuevoUsuario = async (datos: object) => {
     try {
       const response = await postData("agregarNuevoUsuario", datos);
       const { status } = response;
@@ -92,10 +130,7 @@ export default function ModalAddUpdateUsuario({
         const { status, data } = error.response;
 
         if (status === 500) {
-          notifyError(
-            "No se pudo extraer la información, intente más tarde.",
-            "top-center"
-          );
+          notifyError("Ocurrió un error, intente más tarde.", "top-center");
         }
 
         if (status === 409) {
@@ -112,7 +147,59 @@ export default function ModalAddUpdateUsuario({
     }
   };
 
+  const modificarUsuario = async (datos: object) => {
+    // Si algunos de los campos ha cambiado
+    if (
+      datosUsuario?.nombres !== nombres ||
+      datosUsuario.apellido_p !== apellidoP ||
+      datosUsuario.apellido_m !== apellidoM ||
+      datosUsuario.correo !== correo ||
+      datosUsuario.usuariocorreo !== userName ||
+      datosUsuario.password !== password ||
+      datosUsuario.telefono !== telefono ||
+      datosUsuario.nombre_bancario !== nombreBancario
+    ) {
+      try {
+        const response = await postData("modificarUsuario", datos);
+        const { status } = response;
+        if (status === 200) {
+          setTimeout(() => {
+            actualizarRegistros();
+            limpiarCampos();
+            handleClose();
+          }, 400);
+          notifySuccess("¡Usuario actualizado!", "top-center");
+        }
+      } catch (error: any) {
+        if (error.response) {
+          // obtener el status y los datos de la respuesta
+          const { status, data } = error.response;
+
+          if (status === 500) {
+            notifyError("Ocurrió un error, intente más tarde.", "top-center");
+          }
+
+          if (status === 409) {
+            notifyError("El nombre de usuario ya existe.", "top-center", 2500);
+          }
+
+          console.log(
+            `status: ${status} | error: ${data.error} | message: ${data.message}`
+          );
+        } else {
+          // Si no hay `response` (error de red u otro problema)
+          console.log("Error de red o configuración:", error.message);
+        }
+      }
+    }
+    else {
+      handleClose();
+      limpiarCampos();
+    }
+  };
+
   function limpiarCampos() {
+    setIdUsuario(null);
     setNombres("");
     setApellidoP("");
     setApellidoM("");

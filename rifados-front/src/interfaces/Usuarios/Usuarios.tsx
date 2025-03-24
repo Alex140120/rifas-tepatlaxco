@@ -1,8 +1,4 @@
-import {
-  faAdd,
-  faPencil,
-  faTrash,
-} from "@fortawesome/free-solid-svg-icons";
+import { faAdd, faPencil, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tabla from "../../components/Tables/Tabla";
 import { useEffect, useState } from "react";
@@ -58,6 +54,8 @@ export default function Usuarios() {
 
   const [tituloModal, setTituloModal] = useState<string>("");
 
+  const [datosUsuario, setDatosUsuario] = useState<FilasI | null>(null);
+
   const renderColumnContent = (field: string, rowData: FilasI) => {
     if (field === "nombre") {
       return (
@@ -75,7 +73,11 @@ export default function Usuarios() {
             >
               <button
                 className="btn-edit border rounded-1 t4 me-1"
-                onClick={() => {}}
+                onClick={() => {
+                  setDatosUsuario(rowData);
+                  setTituloModal("Modificar");
+                  handleShowModal();
+                }}
               >
                 <FontAwesomeIcon icon={faPencil} />
               </button>
@@ -188,6 +190,7 @@ export default function Usuarios() {
         onClick={() => {
           setTituloModal("Agregar");
           handleShowModal();
+          setDatosUsuario(null);
         }}
       >
         <FontAwesomeIcon icon={faAdd} className="me-2" />
@@ -215,6 +218,7 @@ export default function Usuarios() {
         handleClose={handleCloseModal}
         tituloModal={tituloModal}
         actualizarRegistros={handleActualizarRegistros}
+        datosUsuario={datosUsuario}
       />
     </div>
   );

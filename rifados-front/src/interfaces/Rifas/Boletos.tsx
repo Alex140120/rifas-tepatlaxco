@@ -54,7 +54,7 @@ export default function Boletos() {
       );
       const { status, data } = response;
       //console.log(status);
-      console.log(data);
+      //console.log(data);
       if (status === 204) {
       }
       if (status === 200) {
@@ -211,6 +211,7 @@ export default function Boletos() {
       <ModalAgregarBoletos
         show={show}
         handleClose={handleClose}
+        idProducto={idProducto}
         boletos={boletosSeleccionados}
         precioBoleto={precioBoleto}
         datosGuardados={handleRenderizarBoletos}

@@ -51,6 +51,7 @@ Route::controller(ProcesosController::class)->group(function () {
     Route::post('/subirArchivo', 'subir_archivo');
     Route::get('/extraerProductoRifado', 'extraerProductoRifado');
     Route::get('/extraerBoletosRifaActiva', 'extraerBoletosRifaActiva');
+    Route::post("/guardarDatosRifa", "guardarDatosRifa");
 });
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -63,8 +64,4 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/modificarProducto', 'modificarProducto');
         Route::post('/eliminarImagenProducto', 'eliminarImagenProducto');
     });
-});
-
-Route::controller(ProcesosController::class)->group(function () {
-    Route::post("/guardarDatosRifa", "guardarDatosRifa");
 });

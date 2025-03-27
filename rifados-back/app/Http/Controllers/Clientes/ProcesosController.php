@@ -13,8 +13,11 @@ class ProcesosController extends Controller
         $response = app('App\Http\Controllers\Globales\SubirArchivoController')->SubirArchivo($request, 'archivos', true);
         $output = $response[0] === 1 ? true : false;
 
+        $rutaCompleta = $response[1];
+
         return response()->json([
-            'response' => $output
+            'response' => $output,
+            'ruta' => $rutaCompleta
         ]);
     }
 
@@ -82,8 +85,52 @@ class ProcesosController extends Controller
         }
     }
 
-    public function guardarDatosRifa()
+    public function guardarDatosRifa(Request $request)
     {
-        return response()->json(['output' => true], 200);
+        $params = $request->validate([
+            'idProducto'        => 'required|int',
+            'nombre'            => 'required|string',
+            'numTelefono'       => 'required|string',
+            'estado'            => 'required|int',
+            'localidad'         => 'required|string',
+            'domicilio'         => 'required|string',
+            'codigoPostal'      => 'required|string',
+            'boletosUsuario'    => 'required',
+            'pagoTotal'         => 'required|int',
+            'rutaArchivo'       => 'required|string'
+        ]);
+
+        $boletosUsuario = $params['boletosUsuario'];
+        $boletos = implode(",", $boletosUsuario);
+        $nombre = $params['nombre'];
+        $numTelefono = $params['numTelefono'];
+        $estado = $params['estado'];
+        $localidad = $params['localidad'];
+        $domicilio = $params['domicilio'];
+        $codigoPostal = $params['codigoPostal'];
+        $nombreArchivo = $params['rutaArchivo'];
+
+        $idProducto = $params['idProducto'];
+        $pagoTotal = $params['pagoTotal'];
+
+        try {
+
+            $nuevoBoleto = DB::table('boletos')->insert([
+                'boletos'           => $boletos,
+                'nombre_comprador'  => $nombre,
+                'numero_telefono'   => $numTelefono,
+                'estado'            => $estado,
+                'localidad'         => $localidad,
+                'calle_numero'      => $domicilio,
+                'codigo_postal'     => $codigoPostal,
+                'identificacion'    => $nombreArchivo,
+                'idProducto'        => $idProducto,
+                'pagoTotal'         => $pagoTotal,
+            ]);
+
+            return response()->json(['output' => $nuevoBoleto], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
     }
 }

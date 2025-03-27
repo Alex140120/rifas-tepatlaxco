@@ -100,7 +100,7 @@ class SubirArchivoController extends Controller
             $codigo_transaccion = 2;
         }
 
-        return ([$codigo_transaccion, $path2]);
+        return ([$codigo_transaccion, $path2 ?? ""]);
     }
 
     public function EliminarArchivo($nomFolder, $nombreArchivo)

@@ -22,6 +22,7 @@ import { postData } from "../../api/apiRequest";
 interface Props {
   show: boolean;
   handleClose: () => void;
+  idProducto: number | null;
   boletos: number[];
   precioBoleto: number | null;
   datosGuardados: () => void;
@@ -49,14 +50,18 @@ interface CamposI {
   disArchivo: boolean;
 }
 
+interface ResponseGuardarI {
+  output: boolean;
+}
+
 export default function ModalAgregarBoletos({
   show,
   handleClose,
+  idProducto,
   boletos,
   precioBoleto,
-  datosGuardados
+  datosGuardados,
 }: Props) {
-
   const [pagoTotal, setPagoTotal] = useState<number>(0);
 
   const [boletosUsuario, setBoletosUsuario] = useState<number[]>([]);
@@ -77,7 +82,7 @@ export default function ModalAgregarBoletos({
   const [contenido, setContenido] = useState<JSX.Element>(<></>);
   const [alerta, setAlerta] = useState<JSX.Element>(<></>);
 
-  const [archivoSubido, setArchivoSubido] = useState<boolean>(false);
+  const [rutaArchivo, setRutaArchivo] = useState<string>("");
 
   const [mostrarOcultarBtn, setMostrarOcultarBtn] = useState<boolean>(false);
 
@@ -100,13 +105,19 @@ export default function ModalAgregarBoletos({
       obtenerEstados();
     } else {
       setPagoTotal(0);
-      setContenido(<></>);
       setBoletosUsuario([]);
-      setAlerta(<></>);
+      setNombre("");
+      setNumTelefono("");
+      setEstado("");
+      setLocalidad("");
+      setDomicilio("");
+      setCodigoPostal("");
       setTituloModal("Apartar Boletos");
+      setContenido(<></>);
+      setAlerta(<></>);
+      setRutaArchivo("");
       setMostrarOcultarBtn(false);
       resetearCampos(false);
-      setArchivoSubido(false);
     }
   }, [show]);
 
@@ -152,11 +163,12 @@ export default function ModalAgregarBoletos({
   };
 
   const handleSubirArchivo = async (formData: FormData) => {
+    setAlerta(<></>);
     try {
       const response = await instance.post("/subirArchivo", formData);
 
       //console.log(response.data);
-      setArchivoSubido(response.data.response);
+      setRutaArchivo(response.data.ruta);
     } catch (error) {
       console.log(error);
     }
@@ -199,6 +211,7 @@ export default function ModalAgregarBoletos({
                     disabled={disables.disNombre}
                     value={nombre}
                     onChange={(e) => {
+                      setAlerta(<></>);
                       setNombre(e.target.value);
                     }}
                   />
@@ -219,6 +232,7 @@ export default function ModalAgregarBoletos({
                     disabled={disables.disNumero}
                     value={numTelefono}
                     onChange={(e) => {
+                      setAlerta(<></>);
                       setNumTelefono(handleChangeNumero(e.target.value));
                     }}
                   />
@@ -231,10 +245,11 @@ export default function ModalAgregarBoletos({
                     <FontAwesomeIcon icon={faMap} className="icon-color" />
                   </span>
                   <select
-                    className="w-100 border-0 rounded-end-2 px-1 py-1 icon-color"
+                    className="w-100 border-0 rounded-end-2 px-1 py-2 icon-color"
                     disabled={disables.disEstado}
                     value={estado}
                     onChange={(e) => {
+                      setAlerta(<></>);
                       setEstado(e.target.value);
                     }}
                   >
@@ -258,10 +273,11 @@ export default function ModalAgregarBoletos({
                     />
                   </span>
                   <select
-                    className="w-100 border-0 rounded-end-2 px-1 py-1 icon-color"
+                    className="w-100 border-0 rounded-end-2 px-1 py-2 icon-color"
                     disabled={disables.disLocalidad}
                     value={localidad}
                     onChange={(e) => {
+                      setAlerta(<></>);
                       handleSeleccionaLocalidad(e.target.value);
                     }}
                   >
@@ -289,6 +305,7 @@ export default function ModalAgregarBoletos({
                     disabled={disables.disDomicilio}
                     value={domicilio}
                     onChange={(e) => {
+                      setAlerta(<></>);
                       setDomicilio(e.target.value);
                     }}
                   />
@@ -310,6 +327,7 @@ export default function ModalAgregarBoletos({
                     disabled={disables.disCP}
                     value={codigoPostal}
                     onChange={(e) => {
+                      setAlerta(<></>);
                       setCodigoPostal(handleChangeNumero(e.target.value));
                     }}
                   />
@@ -368,7 +386,7 @@ export default function ModalAgregarBoletos({
     codigoPostal,
     alerta,
     mostrarOcultarBtn,
-    archivoSubido,
+    rutaArchivo,
     disables,
   ]);
 
@@ -385,9 +403,11 @@ export default function ModalAgregarBoletos({
       localidad !== "" &&
       domicilio !== "" &&
       codigoPostal !== "" &&
-      archivoSubido
+      idProducto !== null &&
+      rutaArchivo !== ""
     ) {
       const datos = {
+        idProducto,
         nombre,
         numTelefono,
         estado,
@@ -396,6 +416,7 @@ export default function ModalAgregarBoletos({
         codigoPostal,
         boletosUsuario,
         pagoTotal,
+        rutaArchivo,
       };
 
       Swal.fire({
@@ -415,7 +436,7 @@ export default function ModalAgregarBoletos({
     } else {
       setAlerta(
         <Alerta
-          clases="alerta-danger"
+          clases="alerta-danger expand-animation"
           header="¡ERROR!"
           body="Completa todos los campos."
         />
@@ -424,15 +445,19 @@ export default function ModalAgregarBoletos({
   };
 
   const ejecutarGuardadoDatos = async (datos: Object) => {
-    console.log(datos);
+    //console.log(datos);
     try {
-      const response = await postData("guardarDatosRifa", datos);
+      const response = await postData<ResponseGuardarI>(
+        "guardarDatosRifa",
+        datos
+      );
       const { status, data } = response;
-      if (status === 200) {
+
+      if (status === 200 && data.output) {
         resetearCampos(true);
         setAlerta(
           <Alerta
-            clases="alerta-success"
+            clases="alerta-success expand-animation"
             header=""
             body={`Tus datos han sido guardados exitosamente. <br/> 
               Te debe llegar un mensaje a tu whatsapp con la información agregada recientemente. <br/>
@@ -446,7 +471,7 @@ export default function ModalAgregarBoletos({
       if (error.response) {
         setAlerta(
           <Alerta
-            clases="alerta-danger"
+            clases="alerta-danger expand-animation"
             header=""
             body={`Algo salió mal. <br/> 
               Sus datos no se han podido guardar, inténtelo nuevamente.`}

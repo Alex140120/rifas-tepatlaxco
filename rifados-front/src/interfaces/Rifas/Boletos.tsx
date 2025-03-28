@@ -14,6 +14,7 @@ interface DatosProductoI {
 
 interface ProductoResponseI {
   producto: DatosProductoI;
+  boletosApartados: number[];
 }
 
 export default function Boletos() {
@@ -27,6 +28,8 @@ export default function Boletos() {
   const [rangoFinalBoletos, setRangoFinalBoletos] = useState<number | null>(
     null
   );
+
+  const [boletosComprados, setBoletosComprados] = useState<number[]>([]);
 
   const [showAddBoletos, setShowAddBoletos] = useState<boolean>(false);
 
@@ -62,6 +65,7 @@ export default function Boletos() {
         setPrecioBoleto(data.producto.precioBoleto);
         setRangoInicialBoletos(data.producto.rangoInicial);
         setRangoFinalBoletos(data.producto.rangoFinal);
+        setBoletosComprados(data.boletosApartados);
       }
     } catch (error: any) {
       if (error.response) {
@@ -135,6 +139,7 @@ export default function Boletos() {
     setShowAddBoletos(false);
     setPropiedades({});
     setBoletosSeleccionados([]);
+    setBoletosComprados([]);
     extraerProductoRifado();
   };
 
@@ -180,7 +185,7 @@ export default function Boletos() {
                     },
                     (_, index: number) => {
                       const boletoIndex = rangoInicialBoletos + index;
-                      return (
+                      return !boletosComprados.includes(boletoIndex) ? (
                         <button
                           key={boletoIndex}
                           className={`btn btn-boleto py-1 px-2 ${
@@ -190,7 +195,7 @@ export default function Boletos() {
                         >
                           {boletoIndex}
                         </button>
-                      );
+                      ) : null;
                     }
                   )}
                 </>

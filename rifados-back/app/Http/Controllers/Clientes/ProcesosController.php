@@ -79,7 +79,20 @@ class ProcesosController extends Controller
                 return response()->json(['message' => "Aún no hay producto en rifa."], 204);
             }
 
-            return response()->json(['producto' => $producto], 200);
+            // Extraer los boletos registrados del producto en rifa
+            $boletos = DB::table('boletos')
+                ->where('idProducto', $producto->id)
+                ->pluck('boletos')
+                ->flatMap(function ($boletos) {
+                    return explode(',', $boletos);  // Convierte los valores separados por comas en un arreglo
+                })
+                ->map(function ($boleto) {
+                    return (int) $boleto;  // Convierte cada valor a número entero
+                })
+                ->toArray();  // Convierte el resultado final en un array simple
+
+
+            return response()->json(['producto' => $producto, 'boletosApartados' => $boletos], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }

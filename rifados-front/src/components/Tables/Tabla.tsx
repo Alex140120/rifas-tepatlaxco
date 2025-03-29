@@ -3,8 +3,8 @@ import { Column } from "primereact/column";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { useState, useEffect } from "react";
-import "primereact/resources/themes/saga-green/theme.css";
-//import "primereact/resources/themes/lara-dark-teal/theme.css";
+//import "primereact/resources/themes/saga-green/theme.css";
+import "primereact/resources/themes/lara-dark-teal/theme.css";
 
 interface ColumnasI {
   field: any;

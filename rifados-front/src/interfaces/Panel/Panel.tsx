@@ -8,6 +8,7 @@ import {
   faAdd,
   faCreditCard,
   faList,
+  faNoteSticky,
   faPowerOff,
   faUniversity,
   faUser,
@@ -107,6 +108,13 @@ export default function Panel() {
           >
             <FontAwesomeIcon icon={faCreditCard} />
             <span className="text-button ms-2">Cuentas Bancarias</span>
+          </button>
+          <button
+            className="btn-aside w-100 p-2 outline-none rounded-0"
+            onClick={() => ActualizarMain("boletos")}
+          >
+            <FontAwesomeIcon icon={faNoteSticky} />
+            <span className="text-button ms-2">Boletos</span>
           </button>
         </aside>
         <div className="principal p-3">

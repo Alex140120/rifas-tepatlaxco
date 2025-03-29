@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Administradores;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Globales\AreasGeograficasController;
 use App\Http\Controllers\Globales\AuthUserController;
 use App\Http\Controllers\Globales\SubirArchivoController;
 use App\Models\usuarios;
@@ -15,11 +16,13 @@ class AdministradoresController extends Controller
 {
     private $userAuth;
     private $subirArchivo;
+    private $areasGeograficas;
 
     public function __construct()
     {
         $this->userAuth = app(AuthUserController::class)->AuthUser();
         $this->subirArchivo = new SubirArchivoController();
+        $this->areasGeograficas = new AreasGeograficasController();
     }
 
     public function logueoAdministradores(Request $request)
@@ -458,6 +461,71 @@ class AdministradoresController extends Controller
                 // elimina las cuentas bancarias del usuario
                 DB::table('cuentas_bancarias')->where('id_titular', $idusuario)->delete();
             });
+
+            return response()->json(['output' => true], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function extraerBoletos(Request $request)
+    {
+        try {
+
+            $boletos = DB::table('boletos as ta')
+                ->join('productos as tb', 'ta.idProducto', '=', 'tb.id')
+                ->select('ta.*', 'tb.nombre AS nombreProducto')
+                ->orderBy('ta.id', 'DESC')
+                ->get();
+
+            $boletos = $boletos->map(function ($item) {
+                $idEstado = $item->estado;
+
+                $nombreEstado = $this->areasGeograficas->obtenerEstadoUnico($idEstado);
+                $item->estado = $nombreEstado;
+
+                return $item;
+            });
+
+            return response()->json(['boletos' => $boletos]);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function asignarBoletoPagado(Request $request)
+    {
+        $param = $request->validate([
+            'id' => 'required|int'
+        ]);
+
+        $id = $param['id'];
+
+        try {
+
+            $update = DB::table('boletos')
+                ->where('id', $id)
+                ->update([
+                    'status' => 1
+                ]);
+
+            return response()->json(['output' => $update], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function liberarBoleto(Request $request)
+    {
+        $param = $request->validate([
+            'id' => 'required|int'
+        ]);
+
+        $id = $param['id'];
+
+        try {
+
+            DB::table('boletos')->where('id', $id)->delete();
 
             return response()->json(['output' => true], 200);
         } catch (\Throwable $th) {

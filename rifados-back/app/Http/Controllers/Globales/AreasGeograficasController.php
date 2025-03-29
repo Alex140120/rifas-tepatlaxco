@@ -7,9 +7,11 @@ use Illuminate\Http\Request;
 
 class AreasGeograficasController extends Controller
 {
-    public function estadosMexicanos()
+    private $estados;
+
+    public function __construct()
     {
-        $estados = [
+        $this->estados = [
             ["id" => 1, "nombre" => "Aguascalientes"],
             ["id" => 2, "nombre" => "Baja California"],
             ["id" => 3, "nombre" => "Baja California Sur"],
@@ -43,6 +45,11 @@ class AreasGeograficasController extends Controller
             ["id" => 31, "nombre" => "Yucatán"],
             ["id" => 32, "nombre" => "Zacatecas"]
         ];
+    }
+
+    public function estadosMexicanos()
+    {
+        $estados = $this->estados;
 
         return response()->json([
             'estados' => $estados
@@ -124,5 +131,14 @@ class AreasGeograficasController extends Controller
         return response()->json([
             'lodalidades' => $localidades
         ]);
+    }
+
+    public function obtenerEstadoUnico($idEstado)
+    {
+        $estados = collect($this->estados);
+
+        $estado = $estados->firstWhere('id', $idEstado);
+
+        return $estado ? $estado['nombre'] : null;
     }
 }

@@ -34,6 +34,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/agregarNuevoUsuario', 'agregarNuevoUsuario');
         Route::post('/modificarUsuario', 'modificarUsuario');
         Route::post('/eliminarUsuario', 'eliminarUsuario');
+        Route::get('/extraerBoletos', 'extraerBoletos');
+        Route::post('/asignarBoletoPagado', 'asignarBoletoPagado');
+        Route::post('/liberarBoleto', 'liberarBoleto');
     });
 });
 

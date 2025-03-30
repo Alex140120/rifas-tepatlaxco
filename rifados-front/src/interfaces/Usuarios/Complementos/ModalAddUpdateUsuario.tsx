@@ -20,7 +20,6 @@ interface FilasI {
   apellido_m: string;
   telefono: string;
   correo: string;
-  nombre_bancario: string;
   [key: string]: any; // Firma de índice añadida
 }
 
@@ -49,7 +48,6 @@ export default function ModalAddUpdateUsuario({
   const [userName, setUserName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [telefono, setTelefono] = useState<string>("");
-  const [nombreBancario, setNombreBancario] = useState<string>("");
 
   const [alerta, setAlerta] = useState<boolean>(false);
 
@@ -68,7 +66,6 @@ export default function ModalAddUpdateUsuario({
           setUserName(datosUsuario.usuariocorreo);
           setPassword(datosUsuario.password);
           setTelefono(datosUsuario.telefono);
-          setNombreBancario(datosUsuario.nombre_bancario);
           setCarga(true);
         }
       }
@@ -86,8 +83,7 @@ export default function ModalAddUpdateUsuario({
       correo === "" ||
       userName === "" ||
       password === "" ||
-      telefono === "" ||
-      nombreBancario === ""
+      telefono === ""
     ) {
       setAlerta(true);
       return null;
@@ -102,7 +98,6 @@ export default function ModalAddUpdateUsuario({
       usuariocorreo: userName,
       password,
       telefono,
-      nombre_bancario: nombreBancario,
     };
 
     if (tituloModal === "Agregar") {
@@ -156,8 +151,7 @@ export default function ModalAddUpdateUsuario({
       datosUsuario.correo !== correo ||
       datosUsuario.usuariocorreo !== userName ||
       datosUsuario.password !== password ||
-      datosUsuario.telefono !== telefono ||
-      datosUsuario.nombre_bancario !== nombreBancario
+      datosUsuario.telefono !== telefono
     ) {
       try {
         const response = await postData("modificarUsuario", datos);
@@ -191,8 +185,7 @@ export default function ModalAddUpdateUsuario({
           console.log("Error de red o configuración:", error.message);
         }
       }
-    }
-    else {
+    } else {
       handleClose();
       limpiarCampos();
     }
@@ -207,7 +200,6 @@ export default function ModalAddUpdateUsuario({
     setUserName("");
     setPassword("");
     setTelefono("");
-    setNombreBancario("");
     setAlerta(false);
   }
 
@@ -330,21 +322,6 @@ export default function ModalAddUpdateUsuario({
                     onChange={(e) => {
                       setAlerta(false);
                       setTelefono(e);
-                    }}
-                  />
-                </div>
-
-                {/* Nombre bancario */}
-                <div className="w-100 mb-3">
-                  <p className="m-0 mb-1 text-grey t3">Nombre Bancario* :</p>
-                  <InputText
-                    disabled={false}
-                    placeHolder="Nombre bancario"
-                    tipoValor="texto"
-                    valor={nombreBancario}
-                    onChange={(e) => {
-                      setAlerta(false);
-                      setNombreBancario(e);
                     }}
                   />
                 </div>

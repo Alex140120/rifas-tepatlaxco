@@ -18,6 +18,7 @@ interface FilasI {
   idcuenta: number;
   idtitular: number;
   titular: string;
+  nombreTarjeta: string;
   clabe: string;
   no_tarjeta: string;
   idbanco: number;
@@ -37,6 +38,7 @@ export default function CuentasBancarias() {
     { field: "titular", header: "Titular" },
     { field: "clabe", header: "Clabe" },
     { field: "no_tarjeta", header: "Número de tarjeta" },
+    { field: "nombreTarjeta", header: "Nombre tarjeta" },
     { field: "nombre_banco", header: "Banco" },
     { field: "acciones", header: "" },
   ];

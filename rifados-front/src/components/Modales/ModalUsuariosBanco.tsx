@@ -103,8 +103,12 @@ export default function ModalUsuariosBanco({
                     className="w-100 bg-light rounded-3 p-2 datos-banco mb-3 expand-animation"
                   >
                     <div className="d-flex mb-1" style={{ fontSize: "15px" }}>
-                      <p className="m-0 w-25">Nombre:</p>
+                      <p className="m-0 w-25">Titular:</p>
                       <p className="m-0 w-75">{cuenta.titularCuenta}</p>
+                    </div>
+                    <div className="d-flex mb-1" style={{ fontSize: "15px" }}>
+                      <p className="m-0 w-25">Nombre tarjeta:</p>
+                      <p className="m-0 w-75">{cuenta.nombreTarjeta}</p>
                     </div>
                     <div className="d-flex mb-1" style={{ fontSize: "15px" }}>
                       <p className="m-0 w-25">Clabe:</p>

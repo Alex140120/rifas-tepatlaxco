@@ -23,7 +23,6 @@ interface FilasI {
   apellido_m: string;
   telefono: string;
   correo: string;
-  nombre_bancario: string;
   [key: string]: any; // Firma de índice añadida
 }
 
@@ -40,7 +39,6 @@ export default function Usuarios() {
     { field: "usuariocorreo", header: "Nombre de Usuario" },
     { field: "password", header: "Contraseña" },
     { field: "telefono", header: "Teléfono" },
-    { field: "nombre_bancario", header: "Nombre Bancario" },
     { field: "acciones", header: "" },
   ];
 

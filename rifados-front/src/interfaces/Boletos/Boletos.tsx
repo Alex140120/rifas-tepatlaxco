@@ -7,6 +7,8 @@ import { notifyError, notifySuccess } from "../../components/Alertas/Alertas";
 import { faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Swal from "sweetalert2";
+import SelectEditable from "../../components/Tags/SelectEditable";
+import ModalVerArchivo from "./Complementos/ModalVerArchivo";
 
 interface ColumnasI {
   field: string | number | boolean;
@@ -32,10 +34,16 @@ interface FilasI {
 
 interface ResponseI {
   boletos: FilasI[];
+  productos: OpcionesI[];
 }
 
 interface PropiedadesI {
   [key: string]: boolean;
+}
+
+interface OpcionesI {
+  id: number | string;
+  nombre: string;
 }
 
 export default function Boletos() {
@@ -59,18 +67,36 @@ export default function Boletos() {
 
   const [propiedades, setPropiedades] = useState<PropiedadesI>({});
 
+  const [productoSeleccionado, setProductoSeleccionado] =
+    useState<null | OpcionesI>(null);
+  const [productosFiltro, setProductosFiltro] = useState<OpcionesI[]>([]);
+
+  const [cliente, setCliente] = useState<FilasI | null>(null);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const handleShowModal = () => setShowModal(true);
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setCliente(null);
+  };
+
   // Carga inical
   useEffect(() => {
-    extraerBoletos();
+    extraerBoletos(productoSeleccionado);
   }, []);
 
-  const extraerBoletos = async () => {
+  const extraerBoletos = async (opcion: null | OpcionesI) => {
     try {
-      const response = await getData<ResponseI>("extraerBoletos", null);
+      const valorFiltro = opcion !== null ? opcion.id : "Todos";
+
+      const response = await getData<ResponseI>("extraerBoletos", {
+        valorFiltro,
+      });
       const { status, data } = response;
       if (status === 200) {
         //console.log(data);
         setFilas(data.boletos);
+        const opcionExtra: OpcionesI = { id: "Todos", nombre: "Todos" };
+        setProductosFiltro([opcionExtra, ...data.productos]);
       }
     } catch (error: any) {
       if (error.response) {
@@ -169,7 +195,7 @@ export default function Boletos() {
       const response = await postData("liberarBoleto", { id });
       const { status } = response;
       if (status === 200) {
-        extraerBoletos();
+        extraerBoletos(productoSeleccionado);
         notifySuccess("¡Boletos liberados!", "top-center", 1500);
       }
     } catch (error: any) {
@@ -179,6 +205,46 @@ export default function Boletos() {
           "top-center",
           2500
         );
+        // obtener el status y los datos de la respuesta
+        const { status, data } = error.response;
+        console.log(
+          `status: ${status} | error: ${data.error} | message: ${data.message}`
+        );
+      } else {
+        // Si no hay `response` (error de red u otro problema)
+        console.log("Error de red o configuración:", error.message);
+      }
+    }
+  };
+
+  const handleCambiarFiltroBoletos = (valor: null | OpcionesI) => {
+    setCarga(false);
+    setProductoSeleccionado(valor);
+    if (valor !== null) {
+      extraerBoletos(valor);
+    }
+  };
+
+  const handleQuitarAsignacionPagado = async (id: number) => {
+    // Bloquear boton
+    setPropiedades((prevProp) => ({
+      ...prevProp,
+      [`btnPagado${id}`]: true,
+    }));
+    // Enviar peticion
+    try {
+      const response = await postData("quitarAsignacionPagadoBoleto", { id });
+      const { status } = response;
+      if (status === 200) {
+        setPropiedades((prevProp) => ({
+          ...prevProp,
+          [`status${id}`]: false,
+          [`btnPagado${id}`]: false,
+        }));
+      }
+    } catch (error: any) {
+      if (error.response) {
+        notifyError("Algo salió mal, intente nuevamente.", "top-center", 2500);
         // obtener el status y los datos de la respuesta
         const { status, data } = error.response;
         console.log(
@@ -201,7 +267,10 @@ export default function Boletos() {
               cursor: "pointer",
               textDecoration: "underline",
             }}
-            onClick={() => {}}
+            onClick={() => {
+              setCliente(rowData);
+              handleShowModal();
+            }}
           >
             Ver
           </a>
@@ -213,16 +282,31 @@ export default function Boletos() {
           <button
             disabled={propiedades[`btnPagado${rowData.id}`]}
             className={`${
-              propiedades[`status${rowData.id}`] ? "btn-info-rifas" : "btn-edit"
+              propiedades[`status${rowData.id}`]
+                ? "btn-warning-rifas text-light"
+                : "btn-edit"
             } border rounded-1 t4 mb-1`}
             onClick={() => {
               if (!propiedades[`status${rowData.id}`]) {
                 handleAsignraPagado(rowData.id);
+              } else {
+                handleQuitarAsignacionPagado(rowData.id);
               }
             }}
           >
-            <FontAwesomeIcon icon={faCheck} className="me-1" />
-            Pagado
+            <>
+              {!propiedades[`status${rowData.id}`] ? (
+                <>
+                  <FontAwesomeIcon icon={faCheck} className="me-1" />
+                  Pagado
+                </>
+              ) : (
+                <>
+                  <FontAwesomeIcon icon={faTimes} className="me-1" />
+                  Remover pagado
+                </>
+              )}
+            </>
           </button>
           {!propiedades[`status${rowData.id}`] ? (
             <button
@@ -248,6 +332,17 @@ export default function Boletos() {
       <h2>Boletos</h2>
       <hr />
 
+      <div className="w-100 p-0 mb-2">
+        <SelectEditable
+          placeHolder="Buscar producto"
+          valorSeleccionado={productoSeleccionado}
+          opcionesArray={productosFiltro}
+          cambiarValor={(valor) => {
+            handleCambiarFiltroBoletos(valor);
+          }}
+        />
+      </div>
+
       {carga ? (
         <div className="w-100 expand-animation">
           <Tabla
@@ -263,6 +358,8 @@ export default function Boletos() {
       )}
 
       <ToastContainer />
+
+      <ModalVerArchivo show={showModal} handleClose={handleCloseModal} cliente={cliente} />
     </div>
   );
 }

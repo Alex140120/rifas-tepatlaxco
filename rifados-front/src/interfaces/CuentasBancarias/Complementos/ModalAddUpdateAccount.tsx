@@ -17,6 +17,7 @@ interface FilasI {
   idcuenta: number;
   idtitular: number;
   titular: string;
+  nombreTarjeta: string;
   clabe: string;
   no_tarjeta: string;
   idbanco: number;
@@ -57,6 +58,8 @@ export default function ModalAddUpdateAccount({
 
   const [tarjeta, setTarjeta] = useState<string | number>("");
 
+  const [nombreTarjeta, setNombreTarjeta] = useState<string>("");
+
   const [bancosRegistrados, setBancosRegistrados] = useState<OpcionesI[]>([]);
   const [banco, setBanco] = useState<string | number>("");
 
@@ -75,6 +78,7 @@ export default function ModalAddUpdateAccount({
           setTarjeta(datosCuenta.no_tarjeta);
           setBanco(datosCuenta.idbanco);
           setTitular(datosCuenta.idtitular);
+          setNombreTarjeta(datosCuenta.nombreTarjeta);
         }
       }
     } else {
@@ -113,13 +117,24 @@ export default function ModalAddUpdateAccount({
   };
 
   const guardarCuenta = () => {
-    if (banco === "" || banco === null || titular === "" || titular === null) {
+    if (
+      banco === "" ||
+      banco === null ||
+      titular === "" ||
+      titular === null ||
+      nombreTarjeta === "" ||
+      nombreTarjeta === null
+    ) {
       setBodyAlerta("Favor de llenar todos los campos.");
       setAlerta(true);
       return null;
     }
 
-    if ((clabe !== "" && tarjeta === "") || (clabe === "" && tarjeta !== "") || (clabe !== "" && tarjeta !== "")) {
+    if (
+      (clabe !== "" && tarjeta === "") ||
+      (clabe === "" && tarjeta !== "") ||
+      (clabe !== "" && tarjeta !== "")
+    ) {
       Swal.fire({
         title: "Verifique",
         text: "¿Está seguro que la información proporcionada es la correcta?",
@@ -132,13 +147,14 @@ export default function ModalAddUpdateAccount({
       }).then((result) => {
         if (result.isConfirmed) {
           if (tituloModal === "Agregar") {
-            const datos = { clabe, tarjeta, banco, titular };
+            const datos = { clabe, tarjeta, nombreTarjeta, banco, titular };
             ejecutarGuardadoCuenta(datos);
           } else {
             const datos = {
               idcuenta: datosCuenta?.idcuenta,
               clabe,
               tarjeta,
+              nombreTarjeta,
               banco,
               titular,
             };
@@ -213,6 +229,7 @@ export default function ModalAddUpdateAccount({
   function limpiarCampos() {
     setClabe("");
     setTarjeta("");
+    setNombreTarjeta("");
     setBancosRegistrados([]);
     setBanco("");
     setTitulares([]);
@@ -245,7 +262,7 @@ export default function ModalAddUpdateAccount({
                       disabled={false}
                       placeHolder="Clabe"
                       tipoValor="numero"
-                      valor={clabe}
+                      valor={clabe ?? ""}
                       onChange={(e) => {
                         setAlerta(false);
                         setClabe(e);
@@ -259,10 +276,24 @@ export default function ModalAddUpdateAccount({
                       disabled={false}
                       placeHolder="Número de Tarjeta"
                       tipoValor="numero"
-                      valor={tarjeta}
+                      valor={tarjeta ?? ""}
                       onChange={(e) => {
                         setAlerta(false);
                         setTarjeta(e);
+                      }}
+                    />
+                  </div>
+
+                  {/* NOMBRE TARJETA */}
+                  <div className="mt-3">
+                    <InputText
+                      disabled={false}
+                      placeHolder="Nombre Tarjeta"
+                      tipoValor="texto"
+                      valor={nombreTarjeta ?? ""}
+                      onChange={(e) => {
+                        setAlerta(false);
+                        setNombreTarjeta(e);
                       }}
                     />
                   </div>

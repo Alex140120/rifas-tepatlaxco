@@ -19,7 +19,8 @@ class CuentasBancariasController extends Controller
                 'cb.no_tarjeta',
                 'bn.nombre_banco',
                 'bn.logo_banco',
-                'usr.telefono'
+                'usr.telefono',
+                'cb.nombreTarjeta'
             )
             ->orderBy('bn.nombre_banco', )
             ->get();

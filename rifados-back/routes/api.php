@@ -37,6 +37,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/extraerBoletos', 'extraerBoletos');
         Route::post('/asignarBoletoPagado', 'asignarBoletoPagado');
         Route::post('/liberarBoleto', 'liberarBoleto');
+        Route::get('/productosFiltros', 'productosFiltros');
+        Route::post('/quitarAsignacionPagadoBoleto', 'quitarAsignacionPagadoBoleto');
     });
 });
 

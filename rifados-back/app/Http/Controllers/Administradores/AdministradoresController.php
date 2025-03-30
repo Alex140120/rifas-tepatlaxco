@@ -208,7 +208,8 @@ class AdministradoresController extends Controller
                     DB::raw("CONCAT(tb.nombres, ' ', tb.apellido_p, ' ', tb.apellido_m) AS titularCuenta"),
                     'ta.clabe',
                     'ta.no_tarjeta',
-                    'tb.telefono'
+                    'tb.telefono',
+                    'ta.nombreTarjeta'
                 )
                 ->where('ta.banco', $idBanco)
                 ->get();
@@ -234,7 +235,8 @@ class AdministradoresController extends Controller
                     'tb.logo_banco',
                     'tb.nombre_banco',
                     'tc.id AS idtitular',
-                    DB::raw("CONCAT(tc.nombres, ' ', tc.apellido_p, ' ', tc.apellido_m) as titular")
+                    DB::raw("CONCAT(tc.nombres, ' ', tc.apellido_p, ' ', tc.apellido_m) as titular"),
+                    'ta.nombreTarjeta'
                 )
                 ->orderBy('titular', 'ASC')
                 ->get();
@@ -280,18 +282,21 @@ class AdministradoresController extends Controller
             $params = $request->validate([
                 'banco'     => 'required|int',
                 'titular'   => 'required|int',
+                'nombreTarjeta' => 'required|string'
             ]);
 
             $clabe = $request->clabe;
             $tarjeta = $request->tarjeta;
             $banco = $params['banco'];
             $titular = $params['titular'];
+            $nombreTarjeta = $params['nombreTarjeta'];
 
             $registro = DB::table('cuentas_bancarias')->insert([
                 'clabe' => $clabe,
                 'no_tarjeta' => $tarjeta,
                 'id_titular' => $titular,
-                'banco' => $banco
+                'banco' => $banco,
+                'nombreTarjeta' => $nombreTarjeta
             ]);
 
             return response()->json(['output' => $registro], 200);
@@ -308,6 +313,7 @@ class AdministradoresController extends Controller
                 'idcuenta'  => 'required|int',
                 'banco'     => 'required|int',
                 'titular'   => 'required|int',
+                'nombreTarjeta' => 'required|string'
             ]);
 
             $idcuenta = $params['idcuenta'];
@@ -315,6 +321,7 @@ class AdministradoresController extends Controller
             $tarjeta = $request->tarjeta;
             $banco = $params['banco'];
             $titular = $params['titular'];
+            $nombreTarjeta = $params['nombreTarjeta'];
 
 
             $update = DB::table('cuentas_bancarias')
@@ -323,7 +330,8 @@ class AdministradoresController extends Controller
                     'clabe'         => $clabe,
                     'no_tarjeta'    => $tarjeta,
                     'id_titular'    => $titular,
-                    'banco'         => $banco
+                    'banco'         => $banco,
+                    'nombreTarjeta' => $nombreTarjeta
                 ]);
 
             return response()->json(['output' => $update], 200);
@@ -375,7 +383,6 @@ class AdministradoresController extends Controller
                 'apellido_m'            => 'required|string',
                 'telefono'              => 'required|string',
                 'correo'                => 'required|string',
-                'nombre_bancario'       => 'required|string',
             ]);
 
             extract($params);
@@ -390,8 +397,7 @@ class AdministradoresController extends Controller
                     'apellido_p'        => $apellido_p,
                     'apellido_m'        => $apellido_m,
                     'telefono'          => $telefono,
-                    'correo'            => $correo,
-                    'nombre_bancario'   => $nombre_bancario,
+                    'correo'            => $correo
                 ]);
 
                 return response()->json(['user' => $idNuevo], 200);
@@ -415,7 +421,6 @@ class AdministradoresController extends Controller
                 'apellido_m'            => 'required|string',
                 'telefono'              => 'required|string',
                 'correo'                => 'required|string',
-                'nombre_bancario'       => 'required|string',
             ]);
 
             extract($params);
@@ -432,8 +437,7 @@ class AdministradoresController extends Controller
                         'apellido_p'        => $apellido_p,
                         'apellido_m'        => $apellido_m,
                         'telefono'          => $telefono,
-                        'correo'            => $correo,
-                        'nombre_bancario'   => $nombre_bancario,
+                        'correo'            => $correo
                     ]);
 
                 return response()->json(['output' => $update], 200);
@@ -472,9 +476,26 @@ class AdministradoresController extends Controller
     {
         try {
 
-            $boletos = DB::table('boletos as ta')
-                ->join('productos as tb', 'ta.idProducto', '=', 'tb.id')
+            $valorFiltro = $request->valorFiltro;
+
+            $productos = DB::table('productos')
+                ->select(
+                    'id',
+                    DB::raw("IF (en_rifa = 0, nombre, CONCAT(nombre, ' - Rifado')) AS nombre")
+                )
+                ->orderBy('nombre', 'ASC')
+                ->get();
+
+            $query = DB::table('boletos as ta')
                 ->select('ta.*', 'tb.nombre AS nombreProducto')
+                ->join('productos as tb', 'ta.idProducto', '=', 'tb.id');
+
+            // Si existe un valor de filtro, condicionarlo
+            if ($valorFiltro != "Todos" && $valorFiltro != "" && $valorFiltro != null) {
+                $query->where('tb.id', $valorFiltro);
+            }
+
+            $boletos = $query
                 ->orderBy('ta.id', 'DESC')
                 ->get();
 
@@ -487,7 +508,7 @@ class AdministradoresController extends Controller
                 return $item;
             });
 
-            return response()->json(['boletos' => $boletos]);
+            return response()->json(['boletos' => $boletos, 'productos' => $productos]);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }
@@ -515,6 +536,28 @@ class AdministradoresController extends Controller
         }
     }
 
+    public function quitarAsignacionPagadoBoleto(Request $request)
+    {
+        $param = $request->validate([
+            'id' => 'required|int'
+        ]);
+
+        $id = $param['id'];
+
+        try {
+
+            $update = DB::table('boletos')
+                ->where('id', $id)
+                ->update([
+                    'status' => 0
+                ]);
+
+            return response()->json(['output' => $update], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
     public function liberarBoleto(Request $request)
     {
         $param = $request->validate([
@@ -528,6 +571,23 @@ class AdministradoresController extends Controller
             DB::table('boletos')->where('id', $id)->delete();
 
             return response()->json(['output' => true], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function productosFiltros()
+    {
+        try {
+            $productos = DB::table('productos')
+                ->select(
+                    'id',
+                    DB::raw("IF (en_rifa = 0, nombre, CONCAT(nombre, ' (Rifado)')) AS nombre")
+                )
+                ->orderBy('nombre', 'ASC')
+                ->get();
+
+            return response()->json(['productos' => $productos], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }

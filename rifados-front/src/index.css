@@ -670,6 +670,14 @@ textarea {
   background-color: #0968c8;
 }
 
+.primera-parte {
+  width: 95% !important;
+}
+
+.segunda-parte {
+  width: 5% !important;
+}
+
 .expand-animation {
   animation-delay: 0s; /* Tiempo de iniciarse el efecto*/
   animation-direction: normal; /* Direccion en la que saldrá el efecto */
@@ -691,7 +699,9 @@ textarea {
 @media (max-width: 1000px) {
   .btn-close-sesion {
     margin-left: 0 !important;
-    margin-top: 10px !important;
+    margin-top: 5px !important;
+    padding: 0px 10px !important;
+    font-size: 10px !important;
   }
 
   .btn-aside {
@@ -701,4 +711,25 @@ textarea {
   .text-button {
     display: none !important;
   }
+
+  .container-modulo h2 {
+    font-size: 14px !important;
+  }
+
+  .text-nav-admin h3 {
+    font-size: 15px !important;
+  }
+
+  .text-nav-admin p {
+    font-size: 11px !important;
+  }
+
+  .primera-parte {
+    width: 85% !important;
+  }
+  
+  .segunda-parte {
+    width: 15% !important;
+  }
+
 }

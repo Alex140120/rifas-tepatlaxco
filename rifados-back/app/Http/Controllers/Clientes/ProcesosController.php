@@ -137,20 +137,18 @@ class ProcesosController extends Controller
 
         try {
 
-            // $nuevoBoleto = DB::table('boletos')->insertGetId([
-            //     'boletos'           => $boletos,
-            //     'nombre_comprador'  => $nombre,
-            //     'numero_telefono'   => $numTelefono,
-            //     'estado'            => $estado,
-            //     'localidad'         => $localidad,
-            //     'calle_numero'      => $domicilio,
-            //     'codigo_postal'     => $codigoPostal,
-            //     'identificacion'    => $nombreArchivo,
-            //     'idProducto'        => $idProducto,
-            //     'pagoTotal'         => $pagoTotal,
-            // ]);
-
-            $nuevoBoleto = 2;
+            $nuevoBoleto = DB::table('boletos')->insertGetId([
+                'boletos'           => $boletos,
+                'nombre_comprador'  => $nombre,
+                'numero_telefono'   => $numTelefono,
+                'estado'            => $estado,
+                'localidad'         => $localidad,
+                'calle_numero'      => $domicilio,
+                'codigo_postal'     => $codigoPostal,
+                'identificacion'    => $nombreArchivo,
+                'idProducto'        => $idProducto,
+                'pagoTotal'         => $pagoTotal,
+            ]);
 
             # Mensaje para enviar por whatsApp
             $this->enviarCorreoAdministradores($params, $nuevoBoleto);
@@ -173,16 +171,16 @@ class ProcesosController extends Controller
         $correos = DB::table('usuarios')->pluck('correo');
 
         $asunto = "Nueva compra de {$nombre} para el producto {$nombreProducto} con el ID: $idCompraReciente";
-        $mensaje = `
+        $mensaje = "
             ¡Hola! Has apartado los boletos para {$nombreProducto} <br/><br/>
             Total de boletos: {$boletosCollect->count()} <br/>
             Boletos apartados: {$boletos} <br/>
             Pago total: $$pagoTotal pesos <br/><br/>
             Tu nombre es: {$nombre} <br/>
             Tu número de teléfono: {$numTelefono} <br/>
-            Tu dirección: {$domicilio}, {$localidad}, {$estado}, {codigoPostal}. <br/><br/>
+            Tu dirección: {$domicilio}, {$localidad}, {$estado}, {codigoPostal}. <br/>
 
-            <strong>Importante:</strong> Tienes un lapso de 24 horas para realizar tu transferencia a las cuentas que se muestran en la siguiente liga: http://192.168.1.97:3000/metodosPago
+            <strong>Importante:</strong> Tienes un lapso de 24 horas para realizar tu transferencia a las cuentas que se muestran en la siguiente liga: <a href='http://localhost:3000/metodosPago'>localhost:3000/metodosPago</a>
             <br/>
             Deberá enviar una fotografía del comprobante de pago a este mismo chat. <br/>
             El comprobante de pago debe contener la siguiente información: <br/>
@@ -194,8 +192,10 @@ class ProcesosController extends Controller
             Revise su información descrita en este mensaje, si es correcta proceda a realizar su pago en las cuentas correspondientes, recuerde proporcionar la información de manera correcta a la sucursal mas cercana a su ubicación para evitar errores en las transferencias.
             <br/><br/>
             ¡Mucha Suerte!
-        `;
+        ";
 
-        $this->Mailing->enviarCorreo($asunto, $mensaje, $correos);
+        $mail = $this->Mailing->enviarCorreo($asunto, $mensaje, $correos);
+        //Log::info($mail);
+        return $mail;
     }
 }

@@ -18,10 +18,10 @@ class SMTPCorreosController extends Controller
         try {
             // Configuración del servidor SMTP
             $mail->isSMTP();
-            $mail->Host       = 'smtp.tu-servidor.com'; // Cambia esto
+            $mail->Host       = 'smtp.gmail.com'; // Cambia esto
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'tu-correo@dominio.com'; // Cambia esto
-            $mail->Password   = 'tu-contraseña'; // Cambia esto
+            $mail->Username   = 'rifastepatlaxco@gmail.com'; // Cambia esto
+            $mail->Password   = 'xwtl skey ngsu nwjb'; // Cambia esto
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = 587;
 
@@ -39,9 +39,9 @@ class SMTPCorreosController extends Controller
 
             $mail->send();
 
-            return response()->json(['mensaje' => 'Correo enviado correctamente'], 200);
+            return response()->json(true, 200);
         } catch (Exception $e) {
-            return response()->json(['error' => "Error al enviar el correo: {$mail->ErrorInfo}"], 500);
+            return response()->json($mail->ErrorInfo, 500);
         }
     }
 }

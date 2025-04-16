@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     open: true,
-    host: '192.168.1.97',
+    //host: '192.168.1.97',
     port: 3000,
   },
   optimizeDeps: {

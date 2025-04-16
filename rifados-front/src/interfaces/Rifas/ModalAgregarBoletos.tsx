@@ -466,6 +466,15 @@ export default function ModalAgregarBoletos({
         );
         setMostrarOcultarBtn(true);
         datosGuardados();
+      } else {
+        setAlerta(
+          <Alerta
+            clases="alerta-danger expand-animation"
+            header=""
+            body={`Algo salió mal. <br/> 
+              Sus datos no se han podido guardar, inténtelo nuevamente.`}
+          />
+        );
       }
     } catch (error: any) {
       if (error.response) {

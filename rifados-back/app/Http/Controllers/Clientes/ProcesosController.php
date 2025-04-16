@@ -3,11 +3,20 @@
 namespace App\Http\Controllers\Clientes;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Globales\SMTPCorreosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProcesosController extends Controller
 {
+    private $Mailing;
+
+    public function __construct()
+    {
+        $this->Mailing = new SMTPCorreosController();
+    }
+
     public function subir_archivo(Request $request)
     {
         $response = app('App\Http\Controllers\Globales\SubirArchivoController')->SubirArchivo($request, 'archivos', true);
@@ -113,8 +122,8 @@ class ProcesosController extends Controller
             'rutaArchivo'       => 'required|string'
         ]);
 
-        $boletosUsuario = $params['boletosUsuario'];
-        $boletos = implode(",", $boletosUsuario);
+        $boletosUsuario = collect($params['boletosUsuario']);
+        $boletos = $boletosUsuario->implode(',');
         $nombre = $params['nombre'];
         $numTelefono = $params['numTelefono'];
         $estado = $params['estado'];
@@ -128,22 +137,65 @@ class ProcesosController extends Controller
 
         try {
 
-            $nuevoBoleto = DB::table('boletos')->insert([
-                'boletos'           => $boletos,
-                'nombre_comprador'  => $nombre,
-                'numero_telefono'   => $numTelefono,
-                'estado'            => $estado,
-                'localidad'         => $localidad,
-                'calle_numero'      => $domicilio,
-                'codigo_postal'     => $codigoPostal,
-                'identificacion'    => $nombreArchivo,
-                'idProducto'        => $idProducto,
-                'pagoTotal'         => $pagoTotal,
-            ]);
+            // $nuevoBoleto = DB::table('boletos')->insertGetId([
+            //     'boletos'           => $boletos,
+            //     'nombre_comprador'  => $nombre,
+            //     'numero_telefono'   => $numTelefono,
+            //     'estado'            => $estado,
+            //     'localidad'         => $localidad,
+            //     'calle_numero'      => $domicilio,
+            //     'codigo_postal'     => $codigoPostal,
+            //     'identificacion'    => $nombreArchivo,
+            //     'idProducto'        => $idProducto,
+            //     'pagoTotal'         => $pagoTotal,
+            // ]);
 
-            return response()->json(['output' => $nuevoBoleto], 200);
+            $nuevoBoleto = 2;
+
+            # Mensaje para enviar por whatsApp
+            $this->enviarCorreoAdministradores($params, $nuevoBoleto);
+
+            return response()->json(['output' => true], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }
+    }
+
+    private function enviarCorreoAdministradores($params, $idCompraReciente)
+    {
+        extract($params);
+
+        $nombreProducto = DB::table('productos')->where('id', $idProducto)->value('nombre');
+
+        $boletosCollect = collect($boletosUsuario);
+        $boletos = $boletosCollect->implode((','));
+
+        $correos = DB::table('usuarios')->pluck('correo');
+
+        $asunto = "Nueva compra de {$nombre} para el producto {$nombreProducto} con el ID: $idCompraReciente";
+        $mensaje = `
+            ¡Hola! Has apartado los boletos para {$nombreProducto} <br/><br/>
+            Total de boletos: {$boletosCollect->count()} <br/>
+            Boletos apartados: {$boletos} <br/>
+            Pago total: $$pagoTotal pesos <br/><br/>
+            Tu nombre es: {$nombre} <br/>
+            Tu número de teléfono: {$numTelefono} <br/>
+            Tu dirección: {$domicilio}, {$localidad}, {$estado}, {codigoPostal}. <br/><br/>
+
+            <strong>Importante:</strong> Tienes un lapso de 24 horas para realizar tu transferencia a las cuentas que se muestran en la siguiente liga: http://192.168.1.97:3000/metodosPago
+            <br/>
+            Deberá enviar una fotografía del comprobante de pago a este mismo chat. <br/>
+            El comprobante de pago debe contener la siguiente información: <br/>
+            - Número de cuenta a la que se hizo transferencia. <br/>
+            - Monto pago. <br/>
+            - Fecha de pago. <br/>
+            - Folio. <br/>
+
+            Revise su información descrita en este mensaje, si es correcta proceda a realizar su pago en las cuentas correspondientes, recuerde proporcionar la información de manera correcta a la sucursal mas cercana a su ubicación para evitar errores en las transferencias.
+            <br/><br/>
+            ¡Mucha Suerte!
+        `;
+
+        $this->Mailing->enviarCorreo($asunto, $mensaje, $correos);
     }
 }

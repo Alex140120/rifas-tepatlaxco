@@ -9,6 +9,7 @@ import {
   faAdd,
   faPencil,
   faTimes,
+  faTrash,
   faUsers,
 } from "@fortawesome/free-solid-svg-icons";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
@@ -81,14 +82,14 @@ export default function BancosRegistrados() {
       );
     } else if (field === "acciones") {
       return (
-        <>
+        <div className="d-flex justify-content-center">
           {rowData.cuentas > 0 ? (
             <OverlayTrigger
               placement="top"
               overlay={<Tooltip>Cuentas registradas</Tooltip>}
             >
               <button
-                className={`t3 rounded-1 btn-primary-rifas text-light t4 px-1`}
+                className="btn-users border rounded-1 t4 me-1"
                 onClick={() => {
                   handleShowUsersBank();
                   setDatosBanco({
@@ -107,12 +108,12 @@ export default function BancosRegistrados() {
               overlay={<Tooltip>Eliminar</Tooltip>}
             >
               <button
-                className={`t3 rounded-1 btn-danger-rifas text-light t4`}
+                className={`btn-delete border rounded-1 t4`}
                 onClick={() => {
                   eliminarBanco(rowData.id, rowData.logo_banco);
                 }}
               >
-                <FontAwesomeIcon icon={faTimes} />
+                <FontAwesomeIcon icon={faTrash} />
               </button>
             </OverlayTrigger>
           )}
@@ -122,7 +123,7 @@ export default function BancosRegistrados() {
             overlay={<Tooltip>Modificar</Tooltip>}
           >
             <button
-              className="btn-warning-rifas text-light rounded-1 t4 px-1 ms-2 outline-none"
+              className="btn-edit border rounded-1 t4 ms-1"
               onClick={() => {
                 handleShowNewBank();
                 setTipoTransaccion("update");
@@ -136,7 +137,7 @@ export default function BancosRegistrados() {
               <FontAwesomeIcon icon={faPencil} />
             </button>
           </OverlayTrigger>
-        </>
+        </div>
       );
     } else {
       return rowData[field];

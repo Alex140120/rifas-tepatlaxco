@@ -5,4 +5,5 @@ export interface CuentasBancariasI {
   no_tarjeta: string;
   titularCuenta: string;
   telefono: string;
+  nombreTarjeta: string;
 }

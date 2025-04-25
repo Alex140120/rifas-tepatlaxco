@@ -25,7 +25,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/guardarNuevoBanco', 'guardarNuevoBanco');
         Route::post('/actualizarBanco', 'actualizarBanco');
         Route::post('/eliminarBanco', 'eliminarBanco');
-        //Route::get('/usuariosBancoSeleccionado', 'usuariosBancoSeleccionado');
+        Route::get('/extraerCuentasBancarias', 'extraerCuentasBancarias');
+        Route::get('/usuariosBancosRegistrados', 'usuariosBancosRegistrados');
+        Route::post('/guardarNuevaCuentaBancaria', 'guardarNuevaCuentaBancaria');
+        Route::post('/modificarCuentaBancaria', 'modificarCuentaBancaria');
+        Route::post('/eliminarCuentaBancaria', 'eliminarCuentaBancaria');
+        Route::get('/usuariosRegistrados', 'usuariosRegistrados');
+        Route::post('/agregarNuevoUsuario', 'agregarNuevoUsuario');
+        Route::post('/modificarUsuario', 'modificarUsuario');
+        Route::post('/eliminarUsuario', 'eliminarUsuario');
+        Route::get('/extraerBoletos', 'extraerBoletos');
+        Route::post('/asignarBoletoPagado', 'asignarBoletoPagado');
+        Route::post('/liberarBoleto', 'liberarBoleto');
+        Route::get('/productosFiltros', 'productosFiltros');
+        Route::post('/quitarAsignacionPagadoBoleto', 'quitarAsignacionPagadoBoleto');
     });
 });
 
@@ -43,6 +56,7 @@ Route::controller(ProcesosController::class)->group(function () {
     Route::post('/subirArchivo', 'subir_archivo');
     Route::get('/extraerProductoRifado', 'extraerProductoRifado');
     Route::get('/extraerBoletosRifaActiva', 'extraerBoletosRifaActiva');
+    Route::post("/guardarDatosRifa", "guardarDatosRifa");
 });
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -55,8 +69,4 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/modificarProducto', 'modificarProducto');
         Route::post('/eliminarImagenProducto', 'eliminarImagenProducto');
     });
-});
-
-Route::controller(ProcesosController::class)->group(function () {
-    Route::post("/guardarDatosRifa", "guardarDatosRifa");
 });

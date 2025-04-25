@@ -6,7 +6,9 @@ import instance from "../../api/axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAdd,
+  faCreditCard,
   faList,
+  faNoteSticky,
   faPowerOff,
   faUniversity,
   faUser,
@@ -56,17 +58,17 @@ export default function Panel() {
 
   return (
     <div className="w-100 p-0 m-0">
-      <div className="w-100 bg-dark py-2 px-0 text-light d-flex align-items-center row m-0">
-        <div className="col-lg-11 col-md-11 col-xs-12">
+      <div className="w-100 bg-dark py-2 px-0 text-light d-flex align-items-center row m-0 bg-warning">
+        <div className="primera-parte text-nav-admin">
           <h3 className="m-0 mb-1">{usuario}</h3>
           <p className="m-0 text-danger">Administrador</p>
         </div>
-        <div className="col-lg-1 col-md-1 col-xs-12">
+        <div className="segunda-parte">
           <button
             className="btn btn-light rounded-1 border text-dark d-flex align-items-center justify-content-center btn-close-sesion"
             onClick={handleCerrarSesion}
           >
-            <FontAwesomeIcon icon={faPowerOff} className="m-0" />
+            <FontAwesomeIcon icon={faPowerOff} />
           </button>
         </div>
       </div>
@@ -99,6 +101,20 @@ export default function Panel() {
           >
             <FontAwesomeIcon icon={faUniversity} />
             <span className="text-button ms-2">Bancos Registrados</span>
+          </button>
+          <button
+            className="btn-aside w-100 p-2 outline-none rounded-0"
+            onClick={() => ActualizarMain("cuentasBancarias")}
+          >
+            <FontAwesomeIcon icon={faCreditCard} />
+            <span className="text-button ms-2">Cuentas Bancarias</span>
+          </button>
+          <button
+            className="btn-aside w-100 p-2 outline-none rounded-0"
+            onClick={() => ActualizarMain("boletos")}
+          >
+            <FontAwesomeIcon icon={faNoteSticky} />
+            <span className="text-button ms-2">Boletos</span>
           </button>
         </aside>
         <div className="principal p-3">

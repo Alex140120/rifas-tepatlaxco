@@ -49,8 +49,12 @@ export default function MetodosPago() {
                   </div>
                   <div className="col-lg-10 col-md-10 col-xs-12 mt-2">
                     <div className="d-flex mb-1" style={{ fontSize: "15px" }}>
-                      <p className="m-0 w-25">Nombre:</p>
+                      <p className="m-0 w-25">Titular:</p>
                       <p className="m-0 w-75">{cuenta.titularCuenta}</p>
+                    </div>
+                    <div className="d-flex mb-1" style={{ fontSize: "15px" }}>
+                      <p className="m-0 w-25">Nombre tarjeta:</p>
+                      <p className="m-0 w-75">{cuenta.nombreTarjeta}</p>
                     </div>
                     <div className="d-flex mb-1" style={{ fontSize: "15px" }}>
                       <p className="m-0 w-25">Clabe:</p>

@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencil, faTrash } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
 import ModalEditarProducto from "./Complementos/ModalEditarProducto";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
 
 interface ColumnasI {
   field: string | number | boolean;
@@ -81,31 +82,39 @@ export default function ProductosRifados() {
         </div>
       );
     } else if (field === "precioBoleto") {
-      return (
-        <>$ {rowData.precioBoleto}</>
-      );
+      return <>$ {rowData.precioBoleto}</>;
     } else if (field === "acciones") {
       return (
         <>
           {rowData.status === 0 ? (
             <div className="d-flex justify-content-center">
-              <button
-                className="btn-edit border rounded-1 t4 me-1"
-                onClick={() => {
-                  setProductoSeleccionado(rowData);
-                  handleShow();
-                }}
+              <OverlayTrigger
+                placement="top"
+                overlay={<Tooltip>Modificar</Tooltip>}
               >
-                <FontAwesomeIcon icon={faPencil} />
-              </button>
-              <button
-                className={`btn-delete border rounded-1 t4`}
-                onClick={() => {
-                  handleEliminarProducto(rowData.id);
-                }}
+                <button
+                  className="btn-edit border rounded-1 t4 me-1"
+                  onClick={() => {
+                    setProductoSeleccionado(rowData);
+                    handleShow();
+                  }}
+                >
+                  <FontAwesomeIcon icon={faPencil} />
+                </button>
+              </OverlayTrigger>
+              <OverlayTrigger
+                placement="top"
+                overlay={<Tooltip>Eliminar</Tooltip>}
               >
-                <FontAwesomeIcon icon={faTrash} />
-              </button>
+                <button
+                  className={`btn-delete border rounded-1 t4`}
+                  onClick={() => {
+                    handleEliminarProducto(rowData.id);
+                  }}
+                >
+                  <FontAwesomeIcon icon={faTrash} />
+                </button>
+              </OverlayTrigger>
             </div>
           ) : null}
         </>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Administradores;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Globales\AreasGeograficasController;
 use App\Http\Controllers\Globales\AuthUserController;
 use App\Http\Controllers\Globales\SubirArchivoController;
 use App\Models\usuarios;
@@ -15,11 +16,13 @@ class AdministradoresController extends Controller
 {
     private $userAuth;
     private $subirArchivo;
+    private $areasGeograficas;
 
     public function __construct()
     {
         $this->userAuth = app(AuthUserController::class)->AuthUser();
         $this->subirArchivo = new SubirArchivoController();
+        $this->areasGeograficas = new AreasGeograficasController();
     }
 
     public function logueoAdministradores(Request $request)
@@ -205,12 +208,386 @@ class AdministradoresController extends Controller
                     DB::raw("CONCAT(tb.nombres, ' ', tb.apellido_p, ' ', tb.apellido_m) AS titularCuenta"),
                     'ta.clabe',
                     'ta.no_tarjeta',
-                    'tb.telefono'
+                    'tb.telefono',
+                    'ta.nombreTarjeta'
                 )
                 ->where('ta.banco', $idBanco)
                 ->get();
 
             return response()->json(['cuentas' => $cuentas], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function extraerCuentasBancarias(Request $request)
+    {
+        try {
+
+            $cuentas = DB::table('cuentas_bancarias as ta')
+                ->join('bancos as tb', 'tb.id', '=', 'ta.banco')
+                ->join('usuarios as tc', 'tc.id', '=', 'ta.id_titular')
+                ->select(
+                    'ta.id AS idcuenta',
+                    'ta.clabe',
+                    'ta.no_tarjeta',
+                    'tb.id AS idbanco',
+                    'tb.logo_banco',
+                    'tb.nombre_banco',
+                    'tc.id AS idtitular',
+                    DB::raw("CONCAT(tc.nombres, ' ', tc.apellido_p, ' ', tc.apellido_m) as titular"),
+                    'ta.nombreTarjeta'
+                )
+                ->orderBy('titular', 'ASC')
+                ->get();
+
+            return response()->json(['cuentas' => $cuentas], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function usuariosBancosRegistrados()
+    {
+        try {
+
+            $bancos = DB::table('bancos')
+                ->select(
+                    'id',
+                    'nombre_banco AS opcion',
+                    DB::raw("FALSE AS disabled")
+                )
+                ->orderBy('opcion', 'ASC')
+                ->get();
+
+            $usuarios = DB::table('usuarios')
+                ->select(
+                    'id',
+                    DB::raw("CONCAT (nombres, ' ', apellido_p, ' ', apellido_m) AS opcion"),
+                    DB::raw("FALSE AS disabled")
+                )
+                ->orderBy('opcion', 'ASC')
+                ->get();
+
+            return response()->json(['bancos' => $bancos, 'usuarios' => $usuarios], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function guardarNuevaCuentaBancaria(Request $request)
+    {
+        try {
+
+            $params = $request->validate([
+                'banco'     => 'required|int',
+                'titular'   => 'required|int',
+                'nombreTarjeta' => 'required|string'
+            ]);
+
+            $clabe = $request->clabe;
+            $tarjeta = $request->tarjeta;
+            $banco = $params['banco'];
+            $titular = $params['titular'];
+            $nombreTarjeta = $params['nombreTarjeta'];
+
+            $registro = DB::table('cuentas_bancarias')->insert([
+                'clabe' => $clabe,
+                'no_tarjeta' => $tarjeta,
+                'id_titular' => $titular,
+                'banco' => $banco,
+                'nombreTarjeta' => $nombreTarjeta
+            ]);
+
+            return response()->json(['output' => $registro], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function modificarCuentaBancaria(Request $request)
+    {
+        try {
+
+            $params = $request->validate([
+                'idcuenta'  => 'required|int',
+                'banco'     => 'required|int',
+                'titular'   => 'required|int',
+                'nombreTarjeta' => 'required|string'
+            ]);
+
+            $idcuenta = $params['idcuenta'];
+            $clabe = $request->clabe;
+            $tarjeta = $request->tarjeta;
+            $banco = $params['banco'];
+            $titular = $params['titular'];
+            $nombreTarjeta = $params['nombreTarjeta'];
+
+
+            $update = DB::table('cuentas_bancarias')
+                ->where('id', $idcuenta)
+                ->update([
+                    'clabe'         => $clabe,
+                    'no_tarjeta'    => $tarjeta,
+                    'id_titular'    => $titular,
+                    'banco'         => $banco,
+                    'nombreTarjeta' => $nombreTarjeta
+                ]);
+
+            return response()->json(['output' => $update], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function eliminarCuentaBancaria(Request $request)
+    {
+        $param = $request->validate([
+            'idcuenta' => 'required|int'
+        ]);
+
+        $idcuenta = $param['idcuenta'];
+
+        try {
+
+            DB::table('cuentas_bancarias')->where('id', $idcuenta)->delete();
+
+            return response()->json(['output' => true], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function usuariosRegistrados()
+    {
+        try {
+
+            $usuarios = DB::table('usuarios')
+                ->orderBy('nombres', 'ASC')
+                ->get();
+
+            return response()->json(['usuarios' => $usuarios], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function agregarNuevoUsuario(Request $request)
+    {
+        try {
+            $params = $request->validate([
+                'usuariocorreo'         => 'required|string',
+                'password'              => 'required|string',
+                'nombres'               => 'required|string',
+                'apellido_p'            => 'required|string',
+                'apellido_m'            => 'required|string',
+                'telefono'              => 'required|string',
+                'correo'                => 'required|string',
+            ]);
+
+            extract($params);
+
+            $existeUsuario = DB::table('usuarios')->where('usuariocorreo', $usuariocorreo)->exists();
+
+            if (!$existeUsuario) {
+                $idNuevo = DB::table('usuarios')->insertGetId([
+                    'usuariocorreo'     => $usuariocorreo,
+                    'password'          => $password,
+                    'nombres'           => $nombres,
+                    'apellido_p'        => $apellido_p,
+                    'apellido_m'        => $apellido_m,
+                    'telefono'          => $telefono,
+                    'correo'            => $correo
+                ]);
+
+                return response()->json(['user' => $idNuevo], 200);
+            } else {
+                return response()->json(['output' => false], 409);
+            }
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function modificarUsuario(Request $request)
+    {
+        try {
+            $params = $request->validate([
+                'idUsuario'             => 'required|int',
+                'usuariocorreo'         => 'required|string',
+                'password'              => 'required|string',
+                'nombres'               => 'required|string',
+                'apellido_p'            => 'required|string',
+                'apellido_m'            => 'required|string',
+                'telefono'              => 'required|string',
+                'correo'                => 'required|string',
+            ]);
+
+            extract($params);
+
+            $existeUsuario = DB::table('usuarios')->where('usuariocorreo', $usuariocorreo)->exists();
+
+            if (!$existeUsuario) {
+                $update = DB::table('usuarios')
+                    ->where('id', $idUsuario)
+                    ->update([
+                        'usuariocorreo'     => $usuariocorreo,
+                        'password'          => $password,
+                        'nombres'           => $nombres,
+                        'apellido_p'        => $apellido_p,
+                        'apellido_m'        => $apellido_m,
+                        'telefono'          => $telefono,
+                        'correo'            => $correo
+                    ]);
+
+                return response()->json(['output' => $update], 200);
+            } else {
+                return response()->json(['output' => false], 409);
+            }
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function eliminarUsuario(Request $request)
+    {
+        $param = $request->validate([
+            'idusuario' => 'required|int'
+        ]);
+
+        try {
+
+            $idusuario = $param['idusuario'];
+
+            DB::transaction(function () use ($idusuario) {
+                // Elimina el usuario
+                DB::table('usuarios')->where('id', $idusuario)->delete();
+                // elimina las cuentas bancarias del usuario
+                DB::table('cuentas_bancarias')->where('id_titular', $idusuario)->delete();
+            });
+
+            return response()->json(['output' => true], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function extraerBoletos(Request $request)
+    {
+        try {
+
+            $valorFiltro = $request->valorFiltro;
+
+            $productos = DB::table('productos')
+                ->select(
+                    'id',
+                    DB::raw("IF (en_rifa = 0, nombre, CONCAT(nombre, ' - Rifado')) AS nombre")
+                )
+                ->orderBy('nombre', 'ASC')
+                ->get();
+
+            $query = DB::table('boletos as ta')
+                ->select('ta.*', 'tb.nombre AS nombreProducto')
+                ->join('productos as tb', 'ta.idProducto', '=', 'tb.id');
+
+            // Si existe un valor de filtro, condicionarlo
+            if ($valorFiltro != "Todos" && $valorFiltro != "" && $valorFiltro != null) {
+                $query->where('tb.id', $valorFiltro);
+            }
+
+            $boletos = $query
+                ->orderBy('ta.id', 'DESC')
+                ->get();
+
+            $boletos = $boletos->map(function ($item) {
+                $idEstado = $item->estado;
+
+                $nombreEstado = $this->areasGeograficas->obtenerEstadoUnico($idEstado);
+                $item->estado = $nombreEstado;
+
+                return $item;
+            });
+
+            return response()->json(['boletos' => $boletos, 'productos' => $productos]);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function asignarBoletoPagado(Request $request)
+    {
+        $param = $request->validate([
+            'id' => 'required|int'
+        ]);
+
+        $id = $param['id'];
+
+        try {
+
+            $update = DB::table('boletos')
+                ->where('id', $id)
+                ->update([
+                    'status' => 1
+                ]);
+
+            return response()->json(['output' => $update], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function quitarAsignacionPagadoBoleto(Request $request)
+    {
+        $param = $request->validate([
+            'id' => 'required|int'
+        ]);
+
+        $id = $param['id'];
+
+        try {
+
+            $update = DB::table('boletos')
+                ->where('id', $id)
+                ->update([
+                    'status' => 0
+                ]);
+
+            return response()->json(['output' => $update], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function liberarBoleto(Request $request)
+    {
+        $param = $request->validate([
+            'id' => 'required|int'
+        ]);
+
+        $id = $param['id'];
+
+        try {
+
+            DB::table('boletos')->where('id', $id)->delete();
+
+            return response()->json(['output' => true], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function productosFiltros()
+    {
+        try {
+            $productos = DB::table('productos')
+                ->select(
+                    'id',
+                    DB::raw("IF (en_rifa = 0, nombre, CONCAT(nombre, ' (Rifado)')) AS nombre")
+                )
+                ->orderBy('nombre', 'ASC')
+                ->get();
+
+            return response()->json(['productos' => $productos], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }

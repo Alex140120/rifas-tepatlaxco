@@ -14,10 +14,10 @@ interface DatosProductoI {
 
 interface ProductoResponseI {
   producto: DatosProductoI;
+  boletosApartados: number[];
 }
 
 export default function Boletos() {
-
   const [carga, setCarga] = useState<boolean>(false);
 
   const [idProducto, setIdProducto] = useState<number | null>(null);
@@ -28,6 +28,8 @@ export default function Boletos() {
   const [rangoFinalBoletos, setRangoFinalBoletos] = useState<number | null>(
     null
   );
+
+  const [boletosComprados, setBoletosComprados] = useState<number[]>([]);
 
   const [showAddBoletos, setShowAddBoletos] = useState<boolean>(false);
 
@@ -63,6 +65,7 @@ export default function Boletos() {
         setPrecioBoleto(data.producto.precioBoleto);
         setRangoInicialBoletos(data.producto.rangoInicial);
         setRangoFinalBoletos(data.producto.rangoFinal);
+        setBoletosComprados(data.boletosApartados);
       }
     } catch (error: any) {
       if (error.response) {
@@ -127,6 +130,19 @@ export default function Boletos() {
     setShowAddBoletos(existeActivo);
   }, [propiedades]);
 
+  const handleRenderizarBoletos = () => {
+    setCarga(false);
+    setIdProducto(null);
+    setPrecioBoleto(null);
+    setRangoInicialBoletos(null);
+    setRangoFinalBoletos(null);
+    setShowAddBoletos(false);
+    setPropiedades({});
+    setBoletosSeleccionados([]);
+    setBoletosComprados([]);
+    extraerProductoRifado();
+  };
+
   return (
     <div>
       <div className="row m-0 mt-3">
@@ -169,7 +185,7 @@ export default function Boletos() {
                     },
                     (_, index: number) => {
                       const boletoIndex = rangoInicialBoletos + index;
-                      return (
+                      return !boletosComprados.includes(boletoIndex) ? (
                         <button
                           key={boletoIndex}
                           className={`btn btn-boleto py-1 px-2 ${
@@ -179,7 +195,7 @@ export default function Boletos() {
                         >
                           {boletoIndex}
                         </button>
-                      );
+                      ) : null;
                     }
                   )}
                 </>
@@ -200,8 +216,10 @@ export default function Boletos() {
       <ModalAgregarBoletos
         show={show}
         handleClose={handleClose}
+        idProducto={idProducto}
         boletos={boletosSeleccionados}
         precioBoleto={precioBoleto}
+        datosGuardados={handleRenderizarBoletos}
       />
     </div>
   );

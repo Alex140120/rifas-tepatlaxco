@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Clientes;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Globales\AreasGeograficasController;
 use App\Http\Controllers\Globales\SMTPCorreosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,10 +12,12 @@ use Illuminate\Support\Facades\Log;
 class ProcesosController extends Controller
 {
     private $Mailing;
+    private $areasGeograficas;
 
     public function __construct()
     {
         $this->Mailing = new SMTPCorreosController();
+        $this->areasGeograficas = new AreasGeograficasController();
     }
 
     public function subir_archivo(Request $request)
@@ -168,6 +171,8 @@ class ProcesosController extends Controller
         $boletosCollect = collect($boletosUsuario);
         $boletos = $boletosCollect->implode((','));
 
+        $nombreEstado = $this->areasGeograficas->obtenerEstadoUnico($estado);
+
         $correos = DB::table('usuarios')->pluck('correo');
 
         $asunto = "Nueva compra de {$nombre} para el producto {$nombreProducto} con el ID: $idCompraReciente";
@@ -178,7 +183,7 @@ class ProcesosController extends Controller
             Pago total: $$pagoTotal pesos <br/><br/>
             Tu nombre es: {$nombre} <br/>
             Tu número de teléfono: {$numTelefono} <br/>
-            Tu dirección: {$domicilio}, {$localidad}, {$estado}, {codigoPostal}. <br/>
+            Tu dirección: {$domicilio}, {$localidad}, {$nombreEstado}, {$codigoPostal}. <br/>
 
             <strong>Importante:</strong> Tienes un lapso de 24 horas para realizar tu transferencia a las cuentas que se muestran en la siguiente liga: <a href='http://localhost:3000/metodosPago'>localhost:3000/metodosPago</a>
             <br/>

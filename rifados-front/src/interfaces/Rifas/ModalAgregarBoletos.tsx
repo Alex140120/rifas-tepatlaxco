@@ -18,6 +18,7 @@ import Swal from "sweetalert2";
 import instance from "../../api/axios";
 import InputFile from "../../components/Tags/InputFile";
 import { postData } from "../../api/apiRequest";
+import Spinner from "../../components/Tags/Spinner";
 
 interface Props {
   show: boolean;
@@ -95,6 +96,8 @@ export default function ModalAgregarBoletos({
     disCP: false,
     disArchivo: false,
   });
+
+  const [spinnerShow, setSpinnerShow] = useState<JSX.Element | null>(null);
 
   useEffect(() => {
     if (show && boletos.length) {
@@ -362,12 +365,21 @@ export default function ModalAgregarBoletos({
                   Métodos de Pago
                 </button>
               ) : (
-                <button
-                  className="btn btn-success outline-none"
-                  onClick={() => handleGuardarDatos()}
-                >
-                  <FontAwesomeIcon icon={faSave} className="me-1" /> Guardar
-                </button>
+                <>
+                  <button
+                    className="btn btn-success outline-none"
+                    onClick={() => handleGuardarDatos()}
+                  >
+                    <FontAwesomeIcon icon={faSave} className="me-1" /> Guardar
+                  </button>
+
+                  {spinnerShow ? (
+                    <div className="w-100 text-center mt-3">
+                      <div>{spinnerShow}</div>
+                      <p className="m-0">Cargando...</p>
+                    </div>
+                  ) : null}
+                </>
               )}
             </div>
           </div>
@@ -388,6 +400,7 @@ export default function ModalAgregarBoletos({
     mostrarOcultarBtn,
     rutaArchivo,
     disables,
+    spinnerShow,
   ]);
 
   const handleChangeNumero = (numero: any) => {
@@ -430,6 +443,7 @@ export default function ModalAgregarBoletos({
         cancelButtonText: "Cancelar",
       }).then((result) => {
         if (result.isConfirmed) {
+          setSpinnerShow(<Spinner />);
           ejecutarGuardadoDatos(datos);
         }
       });
@@ -460,7 +474,7 @@ export default function ModalAgregarBoletos({
             clases="alerta-success expand-animation"
             header=""
             body={`Tus datos han sido guardados exitosamente. <br/> 
-              Te debe llegar un mensaje a tu whatsapp con la información agregada recientemente. <br/>
+              En breve deberá llegarle un mensaje por whatsapp con la información agregada recientemente. <br/>
               Presiona el botón "Métodos de Pago" para ver todas las cuentas donde puedes realizar las transferencias por el monto correspondiente.`}
           />
         );
@@ -495,6 +509,8 @@ export default function ModalAgregarBoletos({
         // Si no hay `response` (error de red u otro problema)
         console.log("Error de red o configuración:", error.message);
       }
+    } finally {
+      setSpinnerShow(null);
     }
   };
 

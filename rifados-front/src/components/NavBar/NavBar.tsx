@@ -1,4 +1,4 @@
-import Icon from "/icon.webp";
+import Icon from "/OIP.jpg";
 import { useNavigate } from "react-router-dom";
 
 export default function NavBar() {
@@ -14,7 +14,7 @@ export default function NavBar() {
       <input type="checkbox" id="nav-check" />
       <div className="nav-header d-flex align-items-center">
         <div className="nav-title w-100 d-flex align-items-center">
-          <img src={Icon} width={45} />
+          <img src={Icon} width={45} className="rounded-circle" />
           <h4 className="ms-2 mt-1 text-light">Rifados Tepatlaxco</h4>
         </div>
       </div>

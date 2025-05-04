@@ -104,7 +104,7 @@ class AreasGeograficasController extends Controller
             return response()->json(['localidades' => []]);
         }
 
-        $carpeta = public_path("estados/$archivo.csv");
+        $carpeta = public_path("estados/{$archivo}.csv");
 
         if (!file_exists($carpeta)) {
             return response()->json(['localidades' => []]);

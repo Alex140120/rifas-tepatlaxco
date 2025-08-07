@@ -37,16 +37,14 @@ export default function Home() {
               >
                 Lotería Nacional Mexicana
               </a>
-              . Todos los videos donde pueden visualizarse los ganadores del
-              premio mayor, es en el canal de YouTube{" "}
+              . Todos los videos donde pueden visualizarse los sorteos y conocer qué boleto es el ganador (<b>premio mayor</b>), es en el canal de YouTube{" "}
               <a
                 href="https://www.youtube.com/@LN__Tradicionales"
                 target="_blank"
               >
                 Lotería Nacional · Sorteos Tradicionales
               </a>
-              , donde se toma como referencia, la{" "}
-              <b>coincidencia de los últimos números</b> para conocer el boleto ganador.
+              , y serás el ganador siempre y cuando el número de boleto que hayas seleccionado, sea <b>igual</b> al boleto del premio mayor.
             </p>
           </div>
         </div>
@@ -58,7 +56,7 @@ export default function Home() {
         <div className="parrafo d-flex justify-content-center">
           <div className="py-4">
             <p className="m-0 t1">
-              Se pospone para la siguiente rifa de la Lotería Nacional, no necesitas comprar otro boleto, ya que el mismo será para esta siguiente rifa, por lo que tendrías el doble de posibilidades de llevarte el premio.
+              Se pospone para la siguiente rifa de la Lotería Nacional, no necesitas comprar otro boleto (aunque puedes hacerlo), ya que, el que hayas comprado anteriormente será útil para la siguiente rifa, por lo que tendrías el doble de posibilidades de llevarte el premio.
             </p>
           </div>
         </div>
@@ -70,11 +68,10 @@ export default function Home() {
         <div className="parrafo d-flex justify-content-center">
           <div className="py-4">
             <p className="m-0 t1">
-              Los ganadores pueden visualizarse desde la página de Facebook
-              donde se harán directos en vivo.
+              Los ganadores pueden visualizarse desde la página de <a href="">Facebook</a> donde se harán directos en vivo.
               <br />
               Como se menciona en la pregunta "¿Cómo se eligen los ganadores?"
-              la elección del ganador es en base a la coindicencia de los último números del premio mayor.
+              la elección del ganador del producto en rifa, es mediante el boleto que hayas comprado y debe ser <b>igual</b> al del premio mayor de la Lotería Nacional Mexicana.
             </p>
           </div>
         </div>

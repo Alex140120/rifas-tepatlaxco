@@ -1,4 +1,4 @@
-import { faAdd } from "@fortawesome/free-solid-svg-icons";
+import { faAdd, faTicket } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import ModalAgregarBoletos from "./ModalAgregarBoletos";
@@ -159,15 +159,15 @@ export default function Boletos() {
       {carga ? (
         <>
           {showAddBoletos ? (
-            <div className="w-100 d-flex justify-content-center mt-3 expand-animation">
+            <div className="w-100 d-flex justify-content-end mt-3 expand-animation">
               <button
-                className="btn btn-add-boletos outline-none rounded-4"
+                className="btn btn-add-boletos outline-none rounded-circle d-flex flex-column"
                 onClick={() => {
                   handleShow();
                 }}
               >
-                <FontAwesomeIcon icon={faAdd} className="me-1" />
-                Agregar Boletos
+                <FontAwesomeIcon icon={faTicket} className="mb-1" />
+                APARTAR <br /> BOLETOS
               </button>
             </div>
           ) : null}

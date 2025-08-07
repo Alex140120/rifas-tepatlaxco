@@ -73,27 +73,34 @@ export default function Rifas() {
         {carga ? (
           <div className="p-0 m-0 bg-light expand-animation m-auto">
             {imagenes.length ? (
-              <Carousel interval={2500}>
-                {imagenes.map((item, index) => (
-                  <Carousel.Item key={index}>
-                    <div className="carousel-image-container">
-                      <img
-                        className="d-block img-product-carousel"
-                        src={item.ruta}
-                      />
-                      <div className="overlay" />
-                      <Carousel.Caption>
-                        <h1>{nombre}</h1>
-                        <div className="m-auto text-justify">
-                          <p className="text-light translucent-black t3">
-                            {descripcion}
-                          </p>
-                        </div>
-                      </Carousel.Caption>
-                    </div>
-                  </Carousel.Item>
-                ))}
-              </Carousel>
+              <>
+                <div className="w-100 text-center pt-4 pb-2">
+                  <h2 className="titulo-rifa">
+                    <b>Rifa para el 08 de octubre de 2025</b>
+                  </h2>
+                </div>
+                <Carousel interval={2500}>
+                  {imagenes.map((item, index) => (
+                    <Carousel.Item key={index}>
+                      <div className="carousel-image-container">
+                        <img
+                          className="d-block img-product-carousel"
+                          src={item.ruta}
+                        />
+                        <div className="overlay" />
+                        <Carousel.Caption>
+                          <h1>{nombre}</h1>
+                          <div className="m-auto text-justify">
+                            <p className="text-light translucent-black t3">
+                              {descripcion}
+                            </p>
+                          </div>
+                        </Carousel.Caption>
+                      </div>
+                    </Carousel.Item>
+                  ))}
+                </Carousel>
+              </>
             ) : null}
             {!idProducto ? (
               <div

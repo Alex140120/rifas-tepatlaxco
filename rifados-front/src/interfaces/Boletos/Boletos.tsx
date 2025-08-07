@@ -59,7 +59,6 @@ export default function Boletos() {
     { field: "localidad", header: "Localidad" },
     { field: "calle_numero", header: "Domicilio" },
     { field: "codigo_postal", header: "Código Postal" },
-    { field: "identificacion", header: "Identificación" },
     { field: "acciones", header: "" },
   ];
 

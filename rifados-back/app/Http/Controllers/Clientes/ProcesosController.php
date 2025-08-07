@@ -122,7 +122,7 @@ class ProcesosController extends Controller
             'codigoPostal'      => 'required|string',
             'boletosUsuario'    => 'required',
             'pagoTotal'         => 'required|int',
-            'rutaArchivo'       => 'required|string'
+            'rutaArchivo'       => 'string'
         ]);
 
         $boletosUsuario = collect($params['boletosUsuario']);
@@ -133,7 +133,7 @@ class ProcesosController extends Controller
         $localidad = $params['localidad'];
         $domicilio = $params['domicilio'];
         $codigoPostal = $params['codigoPostal'];
-        $nombreArchivo = $params['rutaArchivo'];
+        $nombreArchivo = $params['rutaArchivo'] ?? "NULL";
 
         $idProducto = $params['idProducto'];
         $pagoTotal = $params['pagoTotal'];
@@ -183,16 +183,16 @@ class ProcesosController extends Controller
             Pago total: $$pagoTotal pesos <br/><br/>
             Tu nombre es: {$nombre} <br/>
             Tu número de teléfono: {$numTelefono} <br/>
-            Tu dirección: {$domicilio}, {$localidad}, {$nombreEstado}, {$codigoPostal}. <br/>
+            Tu dirección: {$domicilio}, {$localidad}, {$nombreEstado}, {$codigoPostal}. <br/><br/>
 
             <strong>Importante:</strong> Tienes un lapso de 24 horas para realizar tu transferencia a las cuentas que se muestran en la siguiente liga: <a href='http://localhost:3000/metodosPago'>localhost:3000/metodosPago</a>
             <br/>
-            Deberá enviar una fotografía del comprobante de pago a este mismo chat. <br/>
+            Deberá enviar una fotografía del comprobante de pago a este mismo chat. <br/><br/>
             El comprobante de pago debe contener la siguiente información: <br/>
             - Número de cuenta a la que se hizo transferencia. <br/>
             - Monto pago. <br/>
             - Fecha de pago. <br/>
-            - Folio. <br/>
+            - Folio. <br/><br/>
 
             Revise su información descrita en este mensaje, si es correcta proceda a realizar su pago en las cuentas correspondientes, recuerde proporcionar la información de manera correcta a la sucursal mas cercana a su ubicación para evitar errores en las transferencias.
             <br/><br/>

@@ -63,9 +63,10 @@ export default function Tabla({ columnas, filas, renderColumnContent }: Props) {
     <>
       <DataTable
         value={filteredRows} // Usa las filas filtradas
-        tableStyle={{ minWidth: "50rem", textAlign: "center" }}
+        tableStyle={{ minWidth: "50rem", textAlign: "center", maxHeight: '200px' }}
         scrollable
-        scrollHeight="calc(85vh - 50px)"
+        stripedRows
+        scrollHeight="calc(65vh - 50px)"
         paginator
         rows={10}
         rowsPerPageOptions={[5, 10, 25, 50]}
@@ -78,6 +79,7 @@ export default function Tabla({ columnas, filas, renderColumnContent }: Props) {
             key={col.field}
             field={col.field}
             header={col.header}
+            style={{ borderBottom: '1px solid #e2e2e2' }}
             body={(rowData) => renderColumnContent(col.field, rowData)}
           />
         ))}

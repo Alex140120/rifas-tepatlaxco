@@ -428,10 +428,22 @@ select {
   color: #fff !important;
 }
 
+.boton-apartar-seccion {
+  position: absolute;
+}
+
 .btn-add-boletos {
   background-color: #05c7a7 !important;
   color: #fff !important;
   border: 1px solid #979797 !important;
+  box-shadow: 0 0 10px 2px #789b95;
+  font-size: 12px !important;
+  padding: 10px 10px !important;
+  
+  position: fixed;
+  bottom: 20px;
+  right: 5px;
+  z-index: 1000000;
 }
 
 .text-grey {
@@ -736,4 +748,11 @@ textarea {
     width: 15% !important;
   }
 
+}
+
+.titulo-rifa {
+  text-decoration-color: red;
+  letter-spacing: 2px;
+  text-emphasis: filled double-circle #ffb703;
+  text-emphasis-position: under;
 }

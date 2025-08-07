@@ -83,7 +83,7 @@ export default function ModalAgregarBoletos({
   const [contenido, setContenido] = useState<JSX.Element>(<></>);
   const [alerta, setAlerta] = useState<JSX.Element>(<></>);
 
-  const [rutaArchivo, setRutaArchivo] = useState<string>("");
+  //const [rutaArchivo, setRutaArchivo] = useState<string>("");
 
   const [mostrarOcultarBtn, setMostrarOcultarBtn] = useState<boolean>(false);
 
@@ -118,7 +118,6 @@ export default function ModalAgregarBoletos({
       setTituloModal("Apartar Boletos");
       setContenido(<></>);
       setAlerta(<></>);
-      setRutaArchivo("");
       setMostrarOcultarBtn(false);
       resetearCampos(false);
     }
@@ -165,17 +164,17 @@ export default function ModalAgregarBoletos({
     setCodigoPostal(localidadObj?.cp ?? "");
   };
 
-  const handleSubirArchivo = async (formData: FormData) => {
-    setAlerta(<></>);
-    try {
-      const response = await instance.post("/subirArchivo", formData);
+  // const handleSubirArchivo = async (formData: FormData) => {
+  //   setAlerta(<></>);
+  //   try {
+  //     const response = await instance.post("/subirArchivo", formData);
 
-      //console.log(response.data);
-      setRutaArchivo(response.data.ruta);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  //     //console.log(response.data);
+  //     setRutaArchivo(response.data.ruta);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   // General el contenido
   useEffect(() => {
@@ -337,7 +336,7 @@ export default function ModalAgregarBoletos({
                 </div>
               </div>
               {/* Archivo */}
-              <div className="col-lg-12 col-md-12 col-xs-12 mb-2">
+              {/* <div className="col-lg-12 col-md-12 col-xs-12 mb-2">
                 <div className="w-100 text-start mt-2">
                   <span className="t3 text-grey">
                     Adjunta una imagen o archivo de tu identificación oficial
@@ -350,7 +349,7 @@ export default function ModalAgregarBoletos({
                   multiple={false}
                   onFormDataReady={handleSubirArchivo}
                 />
-              </div>
+              </div> */}
             </div>
 
             <div className="w-100 mt-3">{alerta}</div>
@@ -398,7 +397,6 @@ export default function ModalAgregarBoletos({
     codigoPostal,
     alerta,
     mostrarOcultarBtn,
-    rutaArchivo,
     disables,
     spinnerShow,
   ]);
@@ -416,8 +414,7 @@ export default function ModalAgregarBoletos({
       localidad !== "" &&
       domicilio !== "" &&
       codigoPostal !== "" &&
-      idProducto !== null &&
-      rutaArchivo !== ""
+      idProducto !== null
     ) {
       const datos = {
         idProducto,
@@ -428,8 +425,7 @@ export default function ModalAgregarBoletos({
         domicilio,
         codigoPostal,
         boletosUsuario,
-        pagoTotal,
-        rutaArchivo,
+        pagoTotal
       };
 
       Swal.fire({

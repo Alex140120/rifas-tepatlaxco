@@ -86,22 +86,22 @@ export default function ProductosRifados() {
     } else if (field === "acciones") {
       return (
         <>
-          {rowData.status === 0 ? (
-            <div className="d-flex justify-content-center">
-              <OverlayTrigger
-                placement="top"
-                overlay={<Tooltip>Modificar</Tooltip>}
+          <div className="d-flex justify-content-center">
+            <OverlayTrigger
+              placement="top"
+              overlay={<Tooltip>Modificar</Tooltip>}
+            >
+              <button
+                className="btn-edit border rounded-1 t4 me-1"
+                onClick={() => {
+                  setProductoSeleccionado(rowData);
+                  handleShow();
+                }}
               >
-                <button
-                  className="btn-edit border rounded-1 t4 me-1"
-                  onClick={() => {
-                    setProductoSeleccionado(rowData);
-                    handleShow();
-                  }}
-                >
-                  <FontAwesomeIcon icon={faPencil} />
-                </button>
-              </OverlayTrigger>
+                <FontAwesomeIcon icon={faPencil} />
+              </button>
+            </OverlayTrigger>
+            {rowData.status === 0 ? (
               <OverlayTrigger
                 placement="top"
                 overlay={<Tooltip>Eliminar</Tooltip>}
@@ -115,8 +115,8 @@ export default function ProductosRifados() {
                   <FontAwesomeIcon icon={faTrash} />
                 </button>
               </OverlayTrigger>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </>
       );
     } else {

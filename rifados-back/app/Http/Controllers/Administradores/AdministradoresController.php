@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Globales\AreasGeograficasController;
 use App\Http\Controllers\Globales\AuthUserController;
 use App\Http\Controllers\Globales\SubirArchivoController;
-use App\Models\usuarios;
+use App\Models\Usuario;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,41 +27,70 @@ class AdministradoresController extends Controller
 
     public function logueoAdministradores(Request $request)
     {
-        // Validar datos
-        $params = $request->validate([
-            'usuario' => 'required|string',
-            'password' => 'required|string',
-        ]);
+        try {
+            // Validar datos
+            $params = $request->validate([
+                'usuario' => 'required|string',
+                'password' => 'required|string',
+            ]);
 
-        // Buscar al usuario en la base de datos
-        $usuario = usuarios::where('usuariocorreo', $params['usuario'])->first();
+            // Buscar al usuario en la base de datos
+            $usuario = Usuario::where('usuariocorreo', $params['usuario'])->first();
 
-        // Validar si el usuario existe
-        if (!$usuario) {
+            // Validar si el usuario existe
+            if (!$usuario) {
+                return response()->json([
+                    'output' => false,
+                    'message' => 'Usuario no encontrado',
+                ], 404);
+            }
+
+            // Validar la contraseña
+            if ($params['password'] !== $usuario->password) {
+                // Contraseña incorrecta
+                return response()->json([
+                    'output' => false,
+                    'message' => 'Contraseña incorrecta',
+                ], 401);
+            }
+
+            // Generar un token de acceso personal con Sanctum
+            $token = $usuario->createToken('auth-token')->plainTextToken;
+
+            // Usuario autenticado correctamente
+            return response()->json([
+                'output' => true,
+                'message' => 'access correct',
+                'token' => $token,
+            ], 200);
+        } catch (\Throwable $th) {
+            
             return response()->json([
                 'output' => false,
-                'message' => 'Usuario no encontrado',
-            ], 404);
-        }
+                'message' => 'Error en el servidor',
+                'error' => $th->getMessage()
+            ], 500);
 
-        // Validar la contraseña
-        if ($params['password'] !== $usuario->password) {
-            // Contraseña incorrecta
+        }
+    }
+
+    public function cerrarSesion(Request $request)
+    {
+        try {
+            // Revocar el token de acceso del usuario autenticado
+            $request->user()->currentAccessToken()->delete();
+
+            return response()->json([
+                'output' => true,
+                'message' => 'Sesión cerrada correctamente',
+            ], 200);
+        } catch (\Throwable $th) {
             return response()->json([
                 'output' => false,
-                'message' => 'Contraseña incorrecta',
-            ], 401);
+                'message' => 'Error al cerrar sesión',
+                'error' => $th->getMessage()
+            ], 500);
         }
-
-        // Generar un token de acceso personal con Sanctum
-        $token = $usuario->createToken('auth-token')->plainTextToken;
-
-        // Usuario autenticado correctamente
-        return response()->json([
-            'output' => true,
-            'message' => 'access correct',
-            'token' => $token,
-        ], 200);
     }
 
     public function informacionLogueo()

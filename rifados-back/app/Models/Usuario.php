@@ -2,16 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class usuarios extends Model
+class Usuario extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens;
-
-    protected $table = 'usuarios'; // Nombre de la tabla en la base de datos
+    use HasApiTokens, Notifiable;
+    // Definir la tabla asociada al modelo
+    protected $table = 'usuarios';
 
     protected $fillable = [
         'usuariocorreo',
@@ -25,8 +24,6 @@ class usuarios extends Model
     ];
 
     protected $hidden = [
-        'password', // Ocultar el password en respuestas JSON
+        'password',
     ];
-
-
 }

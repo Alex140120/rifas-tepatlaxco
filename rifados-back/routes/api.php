@@ -39,6 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/liberarBoleto', 'liberarBoleto');
         Route::get('/productosFiltros', 'productosFiltros');
         Route::post('/quitarAsignacionPagadoBoleto', 'quitarAsignacionPagadoBoleto');
+        Route::post('/logout', 'cerrarSesion');
     });
 });
 
